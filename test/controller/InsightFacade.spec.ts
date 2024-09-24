@@ -76,11 +76,7 @@ describe("InsightFacade", function () {
 
 		it("should reject dataset id with underscore", async function () {
 			try {
-				await facade.addDataset(
-					"test_underscore",
-					sections,
-					InsightDatasetKind.Sections
-				);
+				await facade.addDataset("test_underscore", sections, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown above.");
 			} catch (err) {
 				return expect(err).to.be.instanceOf(InsightError);
@@ -103,11 +99,7 @@ describe("InsightFacade", function () {
 			// } catch (err) {
 			// 	expect.fail("Should not have thrown error.");
 			// }
-			const result = await facade.addDataset(
-				"hello",
-				sections,
-				InsightDatasetKind.Sections
-			);
+			const result = await facade.addDataset("hello", sections, InsightDatasetKind.Sections);
 
 			// check result correct
 			expect(result).to.have.members(["hello"]);
@@ -138,11 +130,7 @@ describe("InsightFacade", function () {
 
 		it("should reject invalid json", async function () {
 			try {
-				await facade.addDataset(
-					"testinvalidjson",
-					invalidJSON,
-					InsightDatasetKind.Sections
-				);
+				await facade.addDataset("testinvalidjson", invalidJSON, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown above.");
 			} catch (err) {
 				return expect(err).to.be.instanceOf(InsightError);
@@ -153,11 +141,7 @@ describe("InsightFacade", function () {
 		// invalid content (Empty text file in folder)
 		it("should reject invalid content", async function () {
 			try {
-				await facade.addDataset(
-					"test_underscore",
-					invalidContent,
-					InsightDatasetKind.Sections
-				);
+				await facade.addDataset("test_underscore", invalidContent, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown above.");
 			} catch (err) {
 				return expect(err).to.be.instanceOf(InsightError);
@@ -167,11 +151,7 @@ describe("InsightFacade", function () {
 		// invalid section invalid remove result key
 		it("should reject remove result", async function () {
 			try {
-				await facade.addDataset(
-					"testremoveresult",
-					removeResult,
-					InsightDatasetKind.Sections
-				);
+				await facade.addDataset("testremoveresult", removeResult, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown above.");
 			} catch (err) {
 				return expect(err).to.be.instanceOf(InsightError);
@@ -181,11 +161,7 @@ describe("InsightFacade", function () {
 		// remove some keys
 		it("should reject remove some keys", async function () {
 			try {
-				await facade.addDataset(
-					"testremovekey",
-					removeKey,
-					InsightDatasetKind.Sections
-				);
+				await facade.addDataset("testremovekey", removeKey, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown above.");
 			} catch (err) {
 				return expect(err).to.be.instanceOf(InsightError);
@@ -334,16 +310,12 @@ describe("InsightFacade", function () {
 				);
 			}
 			// Destructuring assignment to reduce property accesses
-			const { input, expected, errorExpected } = await loadTestQuery(
-				this.test.title
-			);
+			const { input, expected, errorExpected } = await loadTestQuery(this.test.title);
 			let result: InsightResult[];
 			try {
 				result = await facade.performQuery(input);
 				if (errorExpected) {
-					expect.fail(
-						`performQuery resolved when it should have rejected with ${expected}`
-					);
+					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				} else {
 					expect(result).to.be.deep.equal(expected);
 				}
@@ -379,9 +351,7 @@ describe("InsightFacade", function () {
 			try {
 				await Promise.all(loadDatasetPromises);
 			} catch (err) {
-				throw new Error(
-					`In PerformQuery Before hook, dataset(s) failed to be added. \n${err}`
-				);
+				throw new Error(`In PerformQuery Before hook, dataset(s) failed to be added. \n${err}`);
 			}
 		});
 
@@ -396,10 +366,7 @@ describe("InsightFacade", function () {
 		it("[valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
 
 		// result too large error
-		it(
-			"[invalid/invalidmorethan5000.json] SELECT dept, avg WHERE avg > 0",
-			checkQuery
-		);
+		it("[invalid/invalidmorethan5000.json] SELECT dept, avg WHERE avg > 0", checkQuery);
 
 		// missing where, columns
 		it("[invalid/invalid.json] Query missing WHERE", checkQuery);
@@ -418,31 +385,16 @@ describe("InsightFacade", function () {
 		// 	"[invalid/invalidAsteriskOnly.json] Query wrong only has asterisk",
 		// 	checkQuery
 		// );
-		it(
-			"[invalid/invalidConsecutiveAsterisk.json] Query wrong has two consecutive asterisk",
-			checkQuery
-		);
+		it("[invalid/invalidConsecutiveAsterisk.json] Query wrong has two consecutive asterisk", checkQuery);
 
 		// wildcard valid 1: no *
-		it(
-			"[valid/validNoAsterisk.json] SELECT dept WHERE dept = CPSC",
-			checkQuery
-		);
+		it("[valid/validNoAsterisk.json] SELECT dept WHERE dept = CPSC", checkQuery);
 		// valid 2: *inputstring
-		it(
-			"[valid/validFrontAsterisk.json] SELECT dept WHERE dept ends with c",
-			checkQuery
-		);
+		it("[valid/validFrontAsterisk.json] SELECT dept WHERE dept ends with c", checkQuery);
 		// valid 3: inputstring*
-		it(
-			"[valid/validBackAsterisk.json] SELECT dept WHERE dept = c*",
-			checkQuery
-		);
+		it("[valid/validBackAsterisk.json] SELECT dept WHERE dept = c*", checkQuery);
 		// valid 3: *inputstring*
-		it(
-			"[valid/validDoubleAsterisk.json] SELECT dept WHERE dept = *p*",
-			checkQuery
-		);
+		it("[valid/validDoubleAsterisk.json] SELECT dept WHERE dept = *p*", checkQuery);
 
 		// negation
 		it("[invalid/invalidNegation.json] Query wrong negation", checkQuery);
@@ -450,10 +402,7 @@ describe("InsightFacade", function () {
 
 		// mcomparator
 		it("[invalid/invalidMcomparator.json] Query wrong mcomparator", checkQuery);
-		it(
-			"[invalid/invalidMcomparator2.json] Query weird mcomparator",
-			checkQuery
-		);
+		it("[invalid/invalidMcomparator2.json] Query weird mcomparator", checkQuery);
 
 		// logic
 		it("[invalid/invalidLogic.json] Query wrong logic", checkQuery);
