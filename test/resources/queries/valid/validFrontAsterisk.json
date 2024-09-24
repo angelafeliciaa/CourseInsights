@@ -1,0 +1,27 @@
+{
+	"title": "SELECT dept WHERE dept ends with C",
+	"input": {
+		"WHERE": {
+			"AND": [
+			  {
+				"GT": {
+				  "sections_avg": 96
+				}
+			  },
+			  {
+				"IS": {
+				  "sections_dept": "*c"
+				}
+			  }
+			]
+		  },
+		  "OPTIONS": {
+			"COLUMNS": [
+			  "sections_dept",
+			  "sections_avg"
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"sections_dept":"educ","sections_avg":97.5},{"sections_dept":"etec","sections_avg":96.47},{"sections_dept":"etec","sections_avg":96.47},{"sections_dept":"musc","sections_avg":96.5},{"sections_dept":"musc","sections_avg":96.5},{"sections_dept":"psyc","sections_avg":97}]
+}

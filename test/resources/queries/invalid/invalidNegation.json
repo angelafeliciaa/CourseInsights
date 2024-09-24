@@ -1,0 +1,19 @@
+{
+	"title": "Query wrong negation",
+	"input": {
+		"WHERE": {
+			"NOT": {
+				"sections_avg": 97
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_avg",
+				"sections_dept"
+			],
+			"ORDER": "sections_avg"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}
