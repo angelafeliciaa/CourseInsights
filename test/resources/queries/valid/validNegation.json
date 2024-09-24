@@ -1,0 +1,21 @@
+{
+	"title": "Query valid negation",
+	"input": {
+		"WHERE": {
+			"NOT": {
+				"LT": {
+					"sections_avg": 97
+				}
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_avg",
+				"sections_dept"
+			],
+			"ORDER": "sections_avg"
+		}
+	},
+	"errorExpected": false,
+	"expected": "InsightError"
+}

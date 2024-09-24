@@ -1,0 +1,27 @@
+{
+	"title": "SELECT dept WHERE dept = *p*",
+	"input": {
+		"WHERE": {
+			"AND": [
+			  {
+				"GT": {
+				  "sections_avg": 98
+				}
+			  },
+			  {
+				"IS": {
+				  "sections_dept": "*p*"
+				}
+			  }
+			]
+		  },
+		  "OPTIONS": {
+			"COLUMNS": [
+			  "sections_dept",
+			  "sections_avg"
+			]
+		  }
+	},
+	"errorExpected": false,
+	"expected": [{"sections_dept":"cnps","sections_avg":99.19},{"sections_dept":"epse","sections_avg":98.08},{"sections_dept":"epse","sections_avg":98.7},{"sections_dept":"epse","sections_avg":98.36},{"sections_dept":"epse","sections_avg":98.8},{"sections_dept":"epse","sections_avg":98.58},{"sections_dept":"epse","sections_avg":98.58},{"sections_dept":"epse","sections_avg":98.76},{"sections_dept":"epse","sections_avg":98.76},{"sections_dept":"epse","sections_avg":98.45},{"sections_dept":"epse","sections_avg":98.45},{"sections_dept":"spph","sections_avg":98.98},{"sections_dept":"spph","sections_avg":98.98}]
+}

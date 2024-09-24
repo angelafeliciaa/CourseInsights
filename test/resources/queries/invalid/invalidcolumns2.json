@@ -1,0 +1,17 @@
+{
+	"title": "Query wrong COLUMNS",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"sections_avg": 97
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+			  "sections_deaat"
+			]
+		  }
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}
