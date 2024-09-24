@@ -48,7 +48,7 @@
 		"pretty": "prettier --config ./.prettierrc.json --write \"./**/*.ts\"",
 		"lint": "eslint src test --ext .ts",
 		"lint:check": "eslint src test --ext .ts",
-		"lint:fix": "yarn lint --fix",
+		"lint:fix": "eslint src test --ext .ts --fix",
 		"prettier:check": "prettier 'src/**/*.ts' 'test/**/*.ts' --check",
 		"prettier:fix": "prettier 'src/**/*.ts' 'test/**/*.ts' --write"
 	}
