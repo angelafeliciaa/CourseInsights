@@ -351,9 +351,7 @@ describe("InsightFacade", function () {
 			try {
 				await Promise.all(loadDatasetPromises);
 			} catch (err) {
-				throw new Error(
-					`In PerformQuery Before hook, dataset(s) failed to be added. \n${err}`
-				);
+				throw new Error(`In PerformQuery Before hook, dataset(s) failed to be added. \n${err}`);
 			}
 		});
 
