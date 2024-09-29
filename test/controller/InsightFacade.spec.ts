@@ -56,7 +56,7 @@ describe("InsightFacade", function () {
 			await clearDisk();
 		});
 
-		it("should reject with  an empty dataset id", async function () {
+		it("should reject with an empty dataset id", async function () {
 			try {
 				await facade.addDataset("", sections, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown above.");
