@@ -47,12 +47,12 @@ export default class Section {
 
 // Validation function
 export function validateSectionData(data: any): data is Section {
-    return (
-        typeof data.id === 'string' &&
-        typeof data.course === 'string' &&
-        typeof data.instructor === 'string' &&
-        typeof data.semester === 'string' &&
-        typeof data.year === 'number' &&
-        Array.isArray(data.students)
-    );
-} 
+	return (
+		typeof data.id === "string" &&
+		typeof data.course === "string" &&
+		typeof data.instructor === "string" &&
+		typeof data.semester === "string" &&
+		typeof data.year === "number" &&
+		Array.isArray(data.students)
+	);
+}

@@ -7,8 +7,7 @@ import { IInsightFacade, InsightDataset, InsightDatasetKind, InsightResult } fro
  */
 export default class InsightFacade implements IInsightFacade {
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
-
-		// validate zip file 
+		// validate zip file
 
 		// parsing data
 
@@ -19,13 +18,14 @@ export default class InsightFacade implements IInsightFacade {
 		}
 
 		// Validate zip file (pseudo-validation for example)
-		if (!content || !content.startsWith("UEsDB")) { // Assuming valid zip files start with "UEsDB"
+		if (!content || !content.startsWith("UEsDB")) {
+			// Assuming valid zip files start with "UEsDB"
 			throw new Error(`Invalid content for dataset: ${id}`);
 		}
 
 		// Check if dataset with the same id already exists
 		const existingDatasets = await this.listDatasets();
-		if (existingDatasets.some(dataset => dataset.id === id)) {
+		if (existingDatasets.some((dataset) => dataset.id === id)) {
 			throw new Error(`Dataset with id ${id} already exists.`);
 		}
 
@@ -33,7 +33,7 @@ export default class InsightFacade implements IInsightFacade {
 		// Example: await this.saveDataset(id, content, kind);
 
 		// Return the list of dataset ids
-		return existingDatasets.map(dataset => dataset.id).concat(id);
+		return existingDatasets.map((dataset) => dataset.id).concat(id);
 	}
 
 	public async removeDataset(id: string): Promise<string> {
