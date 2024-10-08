@@ -81,26 +81,11 @@ describe("InsightFacade", function () {
 			} catch (err) {
 				return expect(err).to.be.instanceOf(InsightError);
 			}
-
-			// const result = facade.addDataset(
-			// 	"test_underscore",
-			// 	sections,
-			// 	InsightDatasetKind.Sections
-			// );
-
-			// return expect(result).to.eventually.be.rejectedWith(InsightError);
 		});
 
 		// test accept
-
 		it("should add one dataset", async function () {
-			// try {
-			// 	const result = await facade.addDataset("hello", sections, InsightDatasetKind.Sections);
-			// } catch (err) {
-			// 	expect.fail("Should not have thrown error.");
-			// }
 			const result = await facade.addDataset("hello", sections, InsightDatasetKind.Sections);
-
 			// check result correct
 			expect(result).to.have.members(["hello"]);
 		});
