@@ -1,6 +1,6 @@
-import { IInsightFacade, InsightDataset, InsightDatasetKind, InsightResult , InsightError} from "./IInsightFacade";
-import { unzipSync } from 'zlib';
-import { Buffer } from 'buffer';
+import { IInsightFacade, InsightDataset, InsightDatasetKind, InsightResult, InsightError } from "./IInsightFacade";
+import JSZip = require("jszip");
+// import fs = require("fs-extra");
 
 /**
  * This is the main programmatic entry point for the project.
@@ -8,71 +8,51 @@ import { Buffer } from 'buffer';
  *
  */
 
-class validateDataset {
-	isValidBase64(str: string): boolean {
+class ValidateDataset {
+	public async isValidZip(base64Str: string): Promise<JSZip> {
 		try {
-			Buffer.from(str, "base64");
-			return true;
-		} catch (err) {
-			return false;
+			const zip = new JSZip();
+			const zipContent = await zip.loadAsync(base64Str, { base64: true });
+			return zipContent;
+		} catch {
+			throw new InsightError("Invalid zip file");
 		}
 	}
-
-	isValidZip(base64Str: string): Buffer {
-		try {
-            const buffer = Buffer.from(base64Str, "base64");
-            const zipContent = unzipSync(buffer);
-            return zipContent;
-        } catch (err) {
-            throw new InsightError("Invalid zip file");
-        }
-	}
-
-	containsCoursesDirectory(zipContent: Buffer): any[] {
-        // Assuming zipContent contains the unzipped file structure
-        const coursesDir = 'courses/';
-
-        // Extract and list files in the 'courses/' directory
-        const filePaths = this.extractFilePaths(zipContent);
-
-        if (!filePaths.some(filePath => filePath.startsWith(coursesDir))) {
-            throw new InsightError("No 'courses/' directory found in the zip");
-        }
-
-        // Return course files for further validation
-        return filePaths.filter(filePath => filePath.startsWith(coursesDir));
-    }
 
 	// Check if the zip contains at least one valid section
-	isValidCourse(courseFile: string): boolean {
-        try {
-            const courseJson = JSON.parse(courseFile);
-
-            // Ensure the file contains a "result" key with valid sections
-            if (!courseJson.result || !Array.isArray(courseJson.result)) {
-                throw new Error("Invalid course structure, missing 'result' key");
-            }
-
-            // Check if at least one valid section exists
-            return courseJson.result.some(section => this.isValidSection(section));
-        } catch (err) {
-            throw new Error("Invalid JSON format or structure in course");
-        }
-    }
-
-	isValidSection(section: any): boolean {
-		const requiredFields = ["result"];
-		return requiredFields.every(field => field in section);
+	public async isValidCourse(zip: JSZip): Promise<string[]> {
+		const coursesDir = "courses/";
+		const files = Object.keys(zip.files);
+		if (!files.some((filePath) => filePath.startsWith(coursesDir))) {
+			throw new InsightError("No 'courses/' directory found in the zip");
+		}
+		return files.filter((filePath) => filePath.startsWith(coursesDir));
 	}
 
-	validDataset(base64Str: string): void {
-		if (!this.isValidBase64(base64Str)) {
-			throw new InsightError("Invalid dataset");
-		}
-		// unzip
-		const zipContent = this.isValidZip(base64Str);
+	public isValidSection(section: any): boolean {
+		const requiredFields = ["result"];
+		return requiredFields.every((field) => field in section);
+	}
 
-		if (!this.containsValidSection(zipContent)) {
+	public async validDataset(base64Str: string): Promise<void> {
+		const zipContent = await this.isValidZip(base64Str);
+		const courseFiles = await this.isValidCourse(zipContent);
+
+		// check whether there is a valid section
+		const sectionValidationPromises = courseFiles.map(async (file) => {
+			const zipFile = zipContent.file(file);
+			if (zipFile) {
+				const fileContent = await zipFile.async("text");
+				const jsonContent = JSON.parse(fileContent);
+				// Check if the section is valid
+				return this.isValidSection(jsonContent);
+			}
+			return false;
+		});
+
+		const validationResults = await Promise.all(sectionValidationPromises);
+
+		if (!validationResults.some((isValid) => isValid)) {
 			throw new InsightError("No valid sections found");
 		}
 
@@ -82,18 +62,18 @@ class validateDataset {
 
 export default class InsightFacade implements IInsightFacade {
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
-
 		if (!/^[^_]+$/.test(id) || !id.trim()) {
-			throw new InsightError(`Invalid id: ${id}`)
+			throw new InsightError(`Invalid id: ${id}`);
 		}
 
-		try {
-			const validator = new validateDataset();
-			validator.validDataset(content);
-		} catch (err) {
-			throw err
+		const validator = new ValidateDataset();
+		if (kind === InsightDatasetKind.Sections) {
+			await validator.validDataset(content); // Assuming this checks for Sections
+		} else {
+			throw new InsightError(`different kind`);
 		}
-		return []
+		
+		return [];
 	}
 
 	public async removeDataset(id: string): Promise<string> {
