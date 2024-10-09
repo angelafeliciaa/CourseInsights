@@ -81,7 +81,7 @@ class Section {
 		} else {
 			this.year = parseInt(originalData.Year, 10);
 		}
-		this.uuid = originalData.id.toString();
+		this.uuid = originalData.id;
 		this.id = originalData.Course;
 		this.title = originalData.Title;
 		this.instructor = originalData.Professor;
@@ -112,7 +112,6 @@ export default class InsightFacade implements IInsightFacade {
 			if (kind === InsightDatasetKind.Sections) {
 				const processedDataset = await validator.validDataset(content);
 				if (processedDataset.length !== 0) {
-					// create a map of datasets and relate it to the id of added section list
 					if (this.existingDatasetIds.length !== 0) {
 						const json = await this.loadDataFromDisk("./data/section.json");
 						jsonArray = JSON.parse(json);
