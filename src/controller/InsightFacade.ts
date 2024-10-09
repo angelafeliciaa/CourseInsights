@@ -63,12 +63,8 @@ class ValidateDataset {
 }
 
 export default class InsightFacade implements IInsightFacade {
-	private datasetDirectory = "datasets";
+	private datasetDirectory = "type";
 	private datasetMap = new Map<string, any>();
-
-	constructor() {
-		fs.ensureDirSync(this.datasetDirectory); // Ensure the dataset directory exists
-	}
 
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		if (!/^[^_]+$/.test(id) || !id.trim()) {
@@ -83,7 +79,7 @@ export default class InsightFacade implements IInsightFacade {
 		const validator = new ValidateDataset();
 		if (kind === InsightDatasetKind.Sections) {
 			const processedDataset = await validator.validDataset(content);
-			this.processSections(processedDataset, id);
+			await this.processSections(processedDataset, id);
 		} else {
 			throw new InsightError(`different kind`);
 		}
@@ -107,17 +103,11 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	private async loadAllDatasetIdsFromDisk(): Promise<string[]> {
-		try {
-			const files = await fs.readdir(this.datasetDirectory);
-			return files
-				.filter((file) => file.endsWith(".json")) // Only JSON files
-				.map((file) => path.basename(file, ".json")); // Extract dataset ID from the filename
-		} catch {
-			throw new InsightError("Error reading datasets from disk");
-		}
+		const files = await fs.readdir(this.datasetDirectory);
+		return files.filter((file) => file.endsWith(".json")).map((file) => path.basename(file, ".json"));
 	}
 
-	private processSections(datasetContent: any, id: string): void {
+	private async processSections(datasetContent: any, id: string): Promise<void> {
 		const sections = datasetContent.result.map((sectionData: any) => {
 			const transformedData = this.transformSectionData(sectionData);
 			return Section.fromData(transformedData);
@@ -127,7 +117,7 @@ export default class InsightFacade implements IInsightFacade {
 
 		// Persist the processed sections to disk
 		const filePath = path.join(this.datasetDirectory, `${id}.json`);
-		fs.writeJsonSync(filePath, sections);
+		await fs.writeJson(filePath, sections);
 	}
 
 	private transformSectionData(originalData: any): any {
