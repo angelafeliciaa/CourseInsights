@@ -66,6 +66,10 @@ export default class InsightFacade implements IInsightFacade {
 	private datasetDirectory = "type";
 	private datasetMap = new Map<string, any>();
 
+	constructor() {
+		fs.ensureDirSync(this.datasetDirectory);
+	}
+
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		if (!/^[^_]+$/.test(id) || !id.trim()) {
 			throw new InsightError(`Invalid id: ${id}`);
