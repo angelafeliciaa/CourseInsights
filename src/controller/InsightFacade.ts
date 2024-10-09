@@ -62,84 +62,6 @@ class ValidateDataset {
 	}
 }
 
-export default class InsightFacade implements IInsightFacade {
-	private datasetDirectory = "type";
-	private datasetMap = new Map<string, any>();
-
-	constructor() {
-		fs.ensureDirSync(this.datasetDirectory);
-	}
-
-	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
-		if (!/^[^_]+$/.test(id) || !id.trim()) {
-			throw new InsightError(`Invalid id: ${id}`);
-		}
-
-		const existingDatasetIds = await this.loadAllDatasetIdsFromDisk();
-		if (existingDatasetIds.includes(id)) {
-			throw new InsightError(`Dataset with id "${id}" already exists.`);
-		}
-
-		const validator = new ValidateDataset();
-		if (kind === InsightDatasetKind.Sections) {
-			const processedDataset = await validator.validDataset(content);
-			await this.processSections(processedDataset, id);
-		} else {
-			throw new InsightError(`different kind`);
-		}
-
-		return Array.from(this.datasetMap.keys());
-	}
-
-	public async removeDataset(id: string): Promise<string> {
-		// TODO: Remove this once you implement the methods!
-		throw new Error(`InsightFacadeImpl::removeDataset() is unimplemented! - id=${id};`);
-	}
-
-	public async performQuery(query: unknown): Promise<InsightResult[]> {
-		// TODO: Remove this once you implement the methods!
-		throw new Error(`InsightFacadeImpl::performQuery() is unimplemented! - query=${query};`);
-	}
-
-	public async listDatasets(): Promise<InsightDataset[]> {
-		// TODO: Remove this once you implement the methods!
-		throw new Error(`InsightFacadeImpl::listDatasets is unimplemented!`);
-	}
-
-	private async loadAllDatasetIdsFromDisk(): Promise<string[]> {
-		const files = await fs.readdir(this.datasetDirectory);
-		return files.filter((file) => file.endsWith(".json")).map((file) => path.basename(file, ".json"));
-	}
-
-	private async processSections(datasetContent: any, id: string): Promise<void> {
-		const sections = datasetContent.result.map((sectionData: any) => {
-			const transformedData = this.transformSectionData(sectionData);
-			return Section.fromData(transformedData);
-		});
-
-		this.datasetMap.set(id, sections);
-
-		// Persist the processed sections to disk
-		const filePath = path.join(this.datasetDirectory, `${id}.json`);
-		await fs.writeJson(filePath, sections);
-	}
-
-	private transformSectionData(originalData: any): any {
-		return {
-			uuid: originalData.id,
-			id: originalData.Course,
-			title: originalData.Title,
-			instructor: originalData.Professor,
-			dept: originalData.Subject,
-			year: originalData.Year,
-			avg: originalData.Avg,
-			pass: originalData.Pass,
-			fail: originalData.Fail,
-			audit: originalData.Audit,
-		};
-	}
-}
-
 class Section {
 	public uuid: string;
 	public id: string;
@@ -188,5 +110,91 @@ class Section {
 			data.fail,
 			data.audit
 		);
+	}
+}
+
+export default class InsightFacade implements IInsightFacade {
+	private datasetDirectory = "datasets";
+	private datasetMap = new Map<string, any>();
+
+	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
+		await fs.ensureDir(this.datasetDirectory);
+		const existingDatasetIds = await this.loadDatasetsFromDisk();
+		if (!/^[^_]+$/.test(id) || !id.trim()) {
+			throw new InsightError(`Invalid id: ${id}`);
+		}
+
+		if (existingDatasetIds.includes(id)) {
+			throw new InsightError(`Dataset with id "${id}" already exists.`);
+		}
+
+		const validator = new ValidateDataset();
+		if (kind === InsightDatasetKind.Sections) {
+			const processedDataset = await validator.validDataset(content);
+			await this.processSections(processedDataset, id);
+		} else {
+			throw new InsightError(`different kind`);
+		}
+
+		return Array.from(this.datasetMap.keys());
+	}
+
+	public async removeDataset(id: string): Promise<string> {
+		// TODO: Remove this once you implement the methods!
+		throw new Error(`InsightFacadeImpl::removeDataset() is unimplemented! - id=${id};`);
+	}
+
+	public async performQuery(query: unknown): Promise<InsightResult[]> {
+		// TODO: Remove this once you implement the methods!
+		throw new Error(`InsightFacadeImpl::performQuery() is unimplemented! - query=${query};`);
+	}
+
+	public async listDatasets(): Promise<InsightDataset[]> {
+		// TODO: Remove this once you implement the methods!
+		throw new Error(`InsightFacadeImpl::listDatasets is unimplemented!`);
+	}
+
+	private async loadDatasetsFromDisk(): Promise<string[]> {
+		const files = await fs.readdir(this.datasetDirectory);
+		const jsonFiles = files.filter((file) => file.endsWith(".json"));
+
+		const promises = jsonFiles.map(async (file) => {
+			const id = path.basename(file, ".json");
+			const filePath = path.join(this.datasetDirectory, file);
+			const sections = await fs.readJson(filePath);
+			this.datasetMap.set(id, sections);
+			return id;
+		});
+
+		const ids = await Promise.all(promises);
+		return ids;
+	}
+
+	private async processSections(datasetContent: any, id: string): Promise<void> {
+		const sections = await datasetContent.result.map((sectionData: any) => {
+			const transformedData = this.transformSectionData(sectionData);
+			return Section.fromData(transformedData);
+		});
+
+		this.datasetMap.set(id, sections);
+
+		// Persist the processed sections to disk
+		const filePath = path.join(this.datasetDirectory, `${id}.json`);
+		await fs.writeJson(filePath, sections);
+	}
+
+	private transformSectionData(originalData: any): any {
+		return {
+			uuid: originalData.id,
+			id: originalData.Course,
+			title: originalData.Title,
+			instructor: originalData.Professor,
+			dept: originalData.Subject,
+			year: originalData.Year,
+			avg: originalData.Avg,
+			pass: originalData.Pass,
+			fail: originalData.Fail,
+			audit: originalData.Audit,
+		};
 	}
 }
