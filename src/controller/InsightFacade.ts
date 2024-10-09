@@ -1,6 +1,7 @@
 import { IInsightFacade, InsightDataset, InsightDatasetKind, InsightResult, InsightError } from "./IInsightFacade";
 import JSZip = require("jszip");
-// import fs = require("fs-extra");
+import fs = require("fs-extra");
+import path = require("path");
 
 /**
  * This is the main programmatic entry point for the project.
@@ -34,9 +35,10 @@ class ValidateDataset {
 		return requiredFields.every((field) => field in section);
 	}
 
-	public async validDataset(base64Str: string): Promise<void> {
+	public async validDataset(base64Str: string): Promise<any[]> {
 		const zipContent = await this.isValidZip(base64Str);
 		const courseFiles = await this.isValidCourse(zipContent);
+		const validSections: any[] = [];
 
 		// check whether there is a valid section
 		const sectionValidationPromises = courseFiles.map(async (file) => {
@@ -45,35 +47,48 @@ class ValidateDataset {
 				const fileContent = await zipFile.async("text");
 				const jsonContent = JSON.parse(fileContent);
 				// Check if the section is valid
-				return this.isValidSection(jsonContent);
+				if (this.isValidSection(jsonContent)) {
+					validSections.push(jsonContent);
+				}
 			}
-			return false;
 		});
 
-		const validationResults = await Promise.all(sectionValidationPromises);
+		await Promise.all(sectionValidationPromises);
 
-		if (!validationResults.some((isValid) => isValid)) {
+		if (validSections.length === 0) {
 			throw new InsightError("No valid sections found");
 		}
-
-		console.log("Dataset is valid");
+		return validSections;
 	}
 }
 
 export default class InsightFacade implements IInsightFacade {
+	private datasetDirectory = "datasets";
+	private datasetMap = new Map<string, any>();
+
+	constructor() {
+		fs.ensureDirSync(this.datasetDirectory); // Ensure the dataset directory exists
+	}
+
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		if (!/^[^_]+$/.test(id) || !id.trim()) {
 			throw new InsightError(`Invalid id: ${id}`);
 		}
 
+		const existingDatasetIds = await this.loadAllDatasetIdsFromDisk();
+		if (existingDatasetIds.includes(id)) {
+			throw new InsightError(`Dataset with id "${id}" already exists.`);
+		}
+
 		const validator = new ValidateDataset();
 		if (kind === InsightDatasetKind.Sections) {
-			await validator.validDataset(content); // Assuming this checks for Sections
+			const processedDataset = await validator.validDataset(content);
+			this.processSections(processedDataset, id);
 		} else {
 			throw new InsightError(`different kind`);
 		}
-		
-		return [];
+
+		return Array.from(this.datasetMap.keys());
 	}
 
 	public async removeDataset(id: string): Promise<string> {
@@ -89,5 +104,95 @@ export default class InsightFacade implements IInsightFacade {
 	public async listDatasets(): Promise<InsightDataset[]> {
 		// TODO: Remove this once you implement the methods!
 		throw new Error(`InsightFacadeImpl::listDatasets is unimplemented!`);
+	}
+
+	private async loadAllDatasetIdsFromDisk(): Promise<string[]> {
+		try {
+			const files = await fs.readdir(this.datasetDirectory);
+			return files
+				.filter((file) => file.endsWith(".json")) // Only JSON files
+				.map((file) => path.basename(file, ".json")); // Extract dataset ID from the filename
+		} catch {
+			throw new InsightError("Error reading datasets from disk");
+		}
+	}
+
+	private processSections(datasetContent: any, id: string): void {
+		const sections = datasetContent.result.map((sectionData: any) => {
+			const transformedData = this.transformSectionData(sectionData);
+			return Section.fromData(transformedData);
+		});
+
+		this.datasetMap.set(id, sections);
+
+		// Persist the processed sections to disk
+		const filePath = path.join(this.datasetDirectory, `${id}.json`);
+		fs.writeJsonSync(filePath, sections);
+	}
+
+	private transformSectionData(originalData: any): any {
+		return {
+			uuid: originalData.id,
+			id: originalData.Course,
+			title: originalData.Title,
+			instructor: originalData.Professor,
+			dept: originalData.Subject,
+			year: originalData.Year,
+			avg: originalData.Avg,
+			pass: originalData.Pass,
+			fail: originalData.Fail,
+			audit: originalData.Audit,
+		};
+	}
+}
+
+class Section {
+	public uuid: string;
+	public id: string;
+	public title: string;
+	public instructor: string;
+	public dept: string;
+	public year: number;
+	public avg: number;
+	public pass: number;
+	public fail: number;
+	public audit: number;
+
+	constructor(
+		uuid: string,
+		id: string,
+		title: string,
+		instructor: string,
+		dept: string,
+		year: number,
+		avg: number,
+		pass: number,
+		fail: number,
+		audit: number
+	) {
+		this.uuid = uuid;
+		this.id = id;
+		this.title = title;
+		this.instructor = instructor;
+		this.dept = dept;
+		this.year = year;
+		this.avg = avg;
+		this.pass = pass;
+		this.fail = fail;
+		this.audit = audit;
+	}
+	public static fromData(data: any): Section {
+		return new Section(
+			data.uuid, // Assuming `id` is passed as `uuid`
+			data.id,
+			data.title,
+			data.instructor,
+			data.dept,
+			data.year,
+			data.avg,
+			data.pass,
+			data.fail,
+			data.audit
+		);
 	}
 }
