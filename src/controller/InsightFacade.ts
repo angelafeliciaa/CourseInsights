@@ -1,4 +1,11 @@
-import { IInsightFacade, InsightDataset, InsightDatasetKind, InsightResult, InsightError } from "./IInsightFacade";
+import {
+	IInsightFacade,
+	InsightDataset,
+	InsightDatasetKind,
+	InsightResult,
+	InsightError,
+	NotFoundError,
+} from "./IInsightFacade";
 import JSZip = require("jszip");
 import fs = require("fs-extra");
 
@@ -131,8 +138,27 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async removeDataset(id: string): Promise<string> {
-		// TODO: Remove this once you implement the methods!
-		throw new Error(`InsightFacadeImpl::removeDataset() is unimplemented! - id=${id};`);
+		await this.loadDatasetsFromDisk();
+		if (!/^[^_]+$/.test(id) || !id.trim()) {
+			throw new InsightError(`Invalid id: ${id}`);
+		}
+
+		if (this.existingDatasetIds.includes(id)) {
+			this.existingDatasetIds.splice(this.existingDatasetIds.indexOf(id));
+			const json = await this.loadDataFromDisk("./data/section.json");
+			let newJsons = JSON.parse(json);
+			newJsons = newJsons.filter(([key, _]: [string, string, any[]]) => {
+				return key !== id;
+			});
+
+			const jsonFromString = JSON.stringify(newJsons);
+			await this.saveDataToDisk(jsonFromString); // old version
+			// let promise3 = await saveDataToDisk(jsonFromString);
+
+			return id;
+		} else {
+			return Promise.reject(new NotFoundError());
+		}
 	}
 
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
