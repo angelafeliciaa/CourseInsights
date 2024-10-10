@@ -302,8 +302,6 @@ describe("InsightFacade", function () {
 				if (errorExpected) {
 					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				} else {
-					console.log(result);
-					console.log(expected);
 					expect(result).to.have.deep.members(expected);
 				}
 			} catch (err) {
