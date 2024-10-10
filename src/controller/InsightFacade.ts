@@ -1,4 +1,11 @@
-import { IInsightFacade, InsightDataset, InsightDatasetKind, InsightResult, InsightError } from "./IInsightFacade";
+import {
+	IInsightFacade,
+	InsightDataset,
+	InsightDatasetKind,
+	InsightResult,
+	InsightError,
+	NotFoundError,
+} from "./IInsightFacade";
 import JSZip = require("jszip");
 import fs = require("fs-extra");
 
@@ -102,7 +109,7 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
-		let jsonArray: [string, any[]][] = [];
+		let jsonArray: [string, string, any[]][] = [];
 		await this.loadDatasetsFromDisk();
 		if (!/^[^_]+$/.test(id) || !id.trim()) {
 			throw new InsightError(`Invalid id: ${id}`);
@@ -117,7 +124,7 @@ export default class InsightFacade implements IInsightFacade {
 						jsonArray = JSON.parse(json);
 					}
 				}
-				jsonArray.push([id, processedDataset]);
+				jsonArray.push([id, "section", processedDataset]);
 				const jsonString = JSON.stringify(jsonArray);
 				await this.saveDataToDisk(jsonString);
 				this.existingDatasetIds.push(id);
@@ -131,8 +138,27 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async removeDataset(id: string): Promise<string> {
-		// TODO: Remove this once you implement the methods!
-		throw new Error(`InsightFacadeImpl::removeDataset() is unimplemented! - id=${id};`);
+		await this.loadDatasetsFromDisk();
+		if (!/^[^_]+$/.test(id) || !id.trim()) {
+			throw new InsightError(`Invalid id: ${id}`);
+		}
+
+		if (this.existingDatasetIds.includes(id)) {
+			this.existingDatasetIds.splice(this.existingDatasetIds.indexOf(id));
+			const json = await this.loadDataFromDisk("./data/section.json");
+			let newJsons = JSON.parse(json);
+			newJsons = newJsons.filter(([key, _]: [string, string, any[]]) => {
+				return key !== id;
+			});
+
+			const jsonFromString = JSON.stringify(newJsons);
+			await this.saveDataToDisk(jsonFromString); // old version
+			// let promise3 = await saveDataToDisk(jsonFromString);
+
+			return id;
+		} else {
+			return Promise.reject(new NotFoundError());
+		}
 	}
 
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
@@ -141,8 +167,15 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {
-		// TODO: Remove this once you implement the methods!
-		throw new Error(`InsightFacadeImpl::listDatasets is unimplemented!`);
+		const dataset: InsightDataset[] = [];
+		const jsonString = await this.loadDataFromDisk("./data/section.json");
+		const jsonArray: [string, string, any][] = JSON.parse(jsonString);
+		const promises = jsonArray.map(async ([id, kind, value]) => {
+			return this.createInsightData(id, kind, value.length);
+		});
+		const results = await Promise.all(promises);
+		dataset.push(...results);
+		return dataset;
 	}
 
 	public async loadDatasetsFromDisk(): Promise<void> {
@@ -182,16 +215,16 @@ export default class InsightFacade implements IInsightFacade {
 		}
 	}
 
-	// private async processSections(datasetContent: any, id: string): Promise<void> {
-	// 	const sections = await datasetContent.result.map((sectionData: any) => {
-	// 		const transformedData = this.transformSectionData(sectionData);
-	// 		return Section.fromData(transformedData);
-	// 	});
-
-	// 	this.datasetMap.set(id, sections);
-
-	// 	// Persist the processed sections to disk
-	// 	const filePath = path.join(this.datasetDirectory, `${id}.json`);
-	// 	await fs.writeJson(filePath, sections);
-	// }
+	private async createInsightData(id: string, kind: string, numRows: number): Promise<InsightDataset> {
+		if (kind === "section") {
+			const dataKind = InsightDatasetKind.Sections;
+			return {
+				id: id,
+				kind: dataKind,
+				numRows: numRows,
+			};
+		} else {
+			throw new InsightError(`different kind`);
+		}
+	}
 }
