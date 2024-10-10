@@ -1,18 +1,14 @@
 // QueryHelper.ts got from llm
 
 import {
-	InsightDataset,
-	InsightDatasetKind,
 	InsightError,
-	InsightResult,
-	NotFoundError,
-	ResultTooLargeError,
+	InsightResult
 } from "./IInsightFacade";
 import { Section } from "./Section"; // Assuming Section class is in Section.ts
 
 type NumericSectionField = "avg" | "pass" | "fail" | "audit" | "year";
 type StringSectionField = "dept" | "id" | "instructor" | "title" | "uuid";
-type SectionField = NumericSectionField | StringSectionField;
+// type SectionField = NumericSectionField | StringSectionField;
 
 export class QueryHelper {
 	private existingDatasetIds: string[];
@@ -155,7 +151,7 @@ export class QueryHelper {
 			throw new InsightError("MComparator key must reference the correct dataset.");
 		}
 
-		const validFields: Array<NumericSectionField> = ["avg", "pass", "fail", "audit", "year"];
+		const validFields: NumericSectionField[] = ["avg", "pass", "fail", "audit", "year"]; // Use shorthand array syntax
 		if (!validFields.includes(fieldStr as NumericSectionField)) {
 			throw new InsightError("Invalid field in MComparator.");
 		}
@@ -189,7 +185,7 @@ export class QueryHelper {
 			throw new InsightError("SComparator key must reference the correct dataset.");
 		}
 
-		const validFields: Array<StringSectionField> = ["dept", "id", "instructor", "title", "uuid"];
+		const validFields: StringSectionField[] = ["dept", "id", "instructor", "title", "uuid"];
 		if (!validFields.includes(fieldStr as StringSectionField)) {
 			throw new InsightError("Invalid field in SComparator.");
 		}
@@ -237,64 +233,68 @@ export class QueryHelper {
 		return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 	}
 
-	public applyOptions(data: Section[], options: any, datasetId: string): InsightResult[] {
-		const columns = options.COLUMNS;
-		const results = data.map((item) => {
-			const result: any = {};
-			for (const key of columns) {
-				const [id, fieldStr] = key.split("_");
-				if (id !== datasetId) {
-					throw new InsightError("COLUMNS keys must reference the same dataset.");
-				}
+    private mapResult(item: Section, columns: string[], datasetId: string): InsightResult {
+        const result: any = {};
+        for (const key of columns) {
+            const [id, fieldStr] = key.split("_");
+            if (id !== datasetId) {
+                throw new InsightError("COLUMNS keys must reference the same dataset.");
+            }
+    
+            const validFields: (keyof Section)[] = [
+                "uuid",
+                "id",
+                "title",
+                "instructor",
+                "dept",
+                "year",
+                "avg",
+                "pass",
+                "fail",
+                "audit",
+            ];
+    
+            if (!validFields.includes(fieldStr as keyof Section)) {
+                throw new InsightError("Invalid field in COLUMNS.");
+            }
+    
+            const field = fieldStr as keyof Section;
+            result[key] = item[field];
+        }
+        return result;
+    }
 
-				// Combine both numeric and string fields
-				const validFields: Array<keyof Section> = [
-					"uuid",
-					"id",
-					"title",
-					"instructor",
-					"dept",
-					"year",
-					"avg",
-					"pass",
-					"fail",
-					"audit",
-				];
+    private applyOrder(results: InsightResult[], options: any, columns: string[]): void {
+        if ("ORDER" in options) {
+            const order = options.ORDER;
+            if (typeof order === "string") {
+                if (!columns.includes(order)) {
+                    throw new InsightError("ORDER key must be in COLUMNS.");
+                }
+                results.sort((a, b) => {
+                    if (a[order] < b[order]) {
+                        return -1;
+                    } else if (a[order] > b[order]) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                });
+            } else if (typeof order === "object") {
+                // Handle complex ordering if required
+                throw new InsightError("Complex ORDER not implemented.");
+            } else {
+                throw new InsightError("Invalid ORDER.");
+            }
+        }
+    }
 
-				if (!validFields.includes(fieldStr as keyof Section)) {
-					throw new InsightError("Invalid field in COLUMNS.");
-				}
-
-				const field = fieldStr as keyof Section;
-				result[key] = item[field];
-			}
-			return result;
-		});
-
-		// Apply ORDER if specified
-		if ("ORDER" in options) {
-			const order = options.ORDER;
-			if (typeof order === "string") {
-				if (!columns.includes(order)) {
-					throw new InsightError("ORDER key must be in COLUMNS.");
-				}
-				results.sort((a, b) => {
-					if (a[order] < b[order]) {
-						return -1;
-					} else if (a[order] > b[order]) {
-						return 1;
-					} else {
-						return 0;
-					}
-				});
-			} else if (typeof order === "object") {
-				// Handle complex ordering if required
-				throw new InsightError("Complex ORDER not implemented.");
-			} else {
-				throw new InsightError("Invalid ORDER.");
-			}
-		}
-
-		return results;
-	}
+    public applyOptions(data: Section[], options: any, datasetId: string): InsightResult[] {
+        const columns = options.COLUMNS;
+        const results = data.map((item) => this.mapResult(item, columns, datasetId));
+    
+        this.applyOrder(results, options, columns);
+    
+        return results;
+    }
 }

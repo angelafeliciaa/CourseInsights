@@ -138,13 +138,15 @@ export default class InsightFacade implements IInsightFacade {
 			// let promise3 = await saveDataToDisk(jsonFromString);
 
 			// Remove the dataset from the datasets map
-			this.datasets.delete(id);
+			this.datasets["delete"](id);
 
 			return id;
 		} else {
 			return Promise.reject(new NotFoundError());
 		}
 	}
+
+	public readonly MAX_RESULTS = 5000;
 
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
 		// Create an instance of QueryHelper
@@ -170,13 +172,13 @@ export default class InsightFacade implements IInsightFacade {
 		}
 
 		// Apply the WHERE clause to filter the data
-		const filteredData = queryHelper.applyWhereClause(datasetData, queryObj["WHERE"], datasetId);
+		const filteredData = queryHelper.applyWhereClause(datasetData, queryObj.WHERE, datasetId); 
 
 		// Apply OPTIONS (COLUMNS, ORDER) to get the results
-		const results = queryHelper.applyOptions(filteredData, queryObj["OPTIONS"], datasetId);
+		const results = queryHelper.applyOptions(filteredData, queryObj.OPTIONS, datasetId); 
 
 		// Check if the results are too large
-		if (results.length > 5000) {
+		if (results.length > this.MAX_RESULTS) {
 			throw new ResultTooLargeError();
 		}
 
