@@ -5,9 +5,12 @@ import {
 	InsightResult,
 	InsightError,
 	NotFoundError,
+	ResultTooLargeError,
 } from "./IInsightFacade";
 import JSZip = require("jszip");
 import fs = require("fs-extra");
+import { QueryHelper } from "./QueryHelper";
+import { Section } from "./Section";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -74,43 +77,13 @@ class ValidateDataset {
 	}
 }
 
-class Section {
-	public uuid: string;
-	public id: string;
-	public title: string;
-	public instructor: string;
-	public dept: string;
-	public year: number;
-	public avg: number;
-	public pass: number;
-	public fail: number;
-	public audit: number;
-
-	constructor(json: any) {
-		const originalData = json;
-		if (originalData.Section === "overall") {
-			this.year = 1900;
-		} else {
-			this.year = parseInt(originalData.Year, 10);
-		}
-		this.uuid = originalData.id;
-		this.id = originalData.Course;
-		this.title = originalData.Title;
-		this.instructor = originalData.Professor;
-		this.dept = originalData.Subject;
-		this.year = originalData.Year;
-		this.avg = originalData.Avg;
-		this.pass = originalData.Pass;
-		this.fail = originalData.Fail;
-		this.audit = originalData.Audit;
-	}
-}
-
 export default class InsightFacade implements IInsightFacade {
 	private existingDatasetIds: string[];
+	private datasets: Map<string, Section[]>;
 
 	constructor() {
 		this.existingDatasetIds = [];
+		this.datasets = new Map<string, Section[]>();
 	}
 
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
@@ -133,6 +106,10 @@ export default class InsightFacade implements IInsightFacade {
 				const jsonString = JSON.stringify(jsonArray);
 				await this.saveDataToDisk(jsonString);
 				this.existingDatasetIds.push(id);
+
+				// Store the dataset in the datasets map
+				this.datasets.set(id, processedDataset);
+
 				return Array.from(this.existingDatasetIds);
 			} else {
 				throw new InsightError(`different kind`);
@@ -149,7 +126,7 @@ export default class InsightFacade implements IInsightFacade {
 		}
 
 		if (this.existingDatasetIds.includes(id)) {
-			this.existingDatasetIds.splice(this.existingDatasetIds.indexOf(id));
+			this.existingDatasetIds.splice(this.existingDatasetIds.indexOf(id), 1);
 			const json = await this.loadDataFromDisk("./data/section.json");
 			let newJsons = JSON.parse(json);
 			newJsons = newJsons.filter(([key, _]: [string, string, any[]]) => {
@@ -160,6 +137,9 @@ export default class InsightFacade implements IInsightFacade {
 			await this.saveDataToDisk(jsonFromString); // old version
 			// let promise3 = await saveDataToDisk(jsonFromString);
 
+			// Remove the dataset from the datasets map
+			this.datasets.delete(id);
+
 			return id;
 		} else {
 			return Promise.reject(new NotFoundError());
@@ -167,8 +147,40 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
-		// TODO: Remove this once you implement the methods!
-		throw new Error(`InsightFacadeImpl::performQuery() is unimplemented! - query=${query};`);
+		// Create an instance of QueryHelper
+		const queryHelper = new QueryHelper(this.existingDatasetIds, this.datasets);
+
+		// Validate that the query is an object
+		queryHelper.checkValidQuery(query);
+
+		const queryObj = query as any; // Cast to any for easier access
+
+		// Get the dataset id from the query
+		const datasetId = queryHelper.getDatasetIdFromQuery(queryObj);
+
+		// Check that the dataset has been added
+		if (!this.existingDatasetIds.includes(datasetId)) {
+			throw new InsightError(`Dataset ${datasetId} not found.`);
+		}
+
+		// Get the dataset data
+		const datasetData = this.datasets.get(datasetId);
+		if (!datasetData) {
+			throw new InsightError(`Dataset data for ${datasetId} not found.`);
+		}
+
+		// Apply the WHERE clause to filter the data
+		const filteredData = queryHelper.applyWhereClause(datasetData, queryObj["WHERE"], datasetId);
+
+		// Apply OPTIONS (COLUMNS, ORDER) to get the results
+		const results = queryHelper.applyOptions(filteredData, queryObj["OPTIONS"], datasetId);
+
+		// Check if the results are too large
+		if (results.length > 5000) {
+			throw new ResultTooLargeError();
+		}
+
+		return results;
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {
