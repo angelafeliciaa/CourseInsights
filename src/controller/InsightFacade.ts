@@ -172,10 +172,10 @@ export default class InsightFacade implements IInsightFacade {
 		}
 
 		// Apply the WHERE clause to filter the data
-		const filteredData = queryHelper.applyWhereClause(datasetData, queryObj.WHERE, datasetId); 
+		const filteredData = queryHelper.applyWhereClause(datasetData, queryObj.WHERE, datasetId);
 
 		// Apply OPTIONS (COLUMNS, ORDER) to get the results
-		const results = queryHelper.applyOptions(filteredData, queryObj.OPTIONS, datasetId); 
+		const results = queryHelper.applyOptions(filteredData, queryObj.OPTIONS, datasetId);
 
 		// Check if the results are too large
 		if (results.length > this.MAX_RESULTS) {
