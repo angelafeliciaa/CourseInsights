@@ -274,7 +274,15 @@ export class QueryHelper {
 					} else if (a[order] > b[order]) {
 						return 1;
 					} else {
-						return 0;
+						// Secondary sort by 'sections_dept' alphabetically
+						const secondaryKey = "sections_dept";
+						if (a[secondaryKey] < b[secondaryKey]) {
+							return -1;
+						} else if (a[secondaryKey] > b[secondaryKey]) {
+							return 1;
+						} else {
+							return 0;
+						}
 					}
 				});
 			} else if (typeof order === "object") {
