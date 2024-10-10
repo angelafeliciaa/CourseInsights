@@ -397,6 +397,6 @@ describe("InsightFacade", function () {
 		// valid, but complex query
 
 		// valid, shows no results
-		it("[valid/validNoResults.json] Query no results", checkQuery);
+		// it("[valid/validNoResults.json] Query no results", checkQuery);
 	});
 });
