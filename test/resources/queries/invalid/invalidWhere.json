@@ -1,0 +1,12 @@
+{
+    "title": "Invalid WHERE Structure",
+    "input": {
+      "WHERE": null,
+      "OPTIONS": {
+        "COLUMNS": ["courses_dept", "courses_avg"]
+      }
+    },
+    "errorExpected": true,
+    "expected": "InsightError"
+  }
+  

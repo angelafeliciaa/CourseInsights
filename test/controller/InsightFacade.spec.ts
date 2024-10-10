@@ -311,6 +311,8 @@ describe("InsightFacade", function () {
 					expect(err).to.be.instanceOf(InsightError);
 				} else if (expected === "ResultTooLargeError") {
 					expect(err).to.be.instanceOf(ResultTooLargeError);
+				} else {
+					expect.fail(`performQuery threw unexpected error: ${err}`);
 				}
 				// return expect.fail("Write your assertion(s) here."); // TODO: replace with your assertions
 				// expect(err).to.be.instanceOf(errorExpected);
@@ -394,6 +396,12 @@ describe("InsightFacade", function () {
 
 		// invalid wrong dataset
 		it("[invalid/invalidData.json] Query wrong data", checkQuery);
+
+		it("[invalid/invalidNullQuery.json] Query is null", checkQuery);
+
+		it("[invalid/invalidMissingWhereOptions.json] Missing WHERE and OPTIONS", checkQuery);
+		it("[invalid/invalidWhere.json] Invalid WHERE StructureS", checkQuery);
+
 		// valid, but complex query
 
 		// valid, shows no results
