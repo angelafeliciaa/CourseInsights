@@ -273,7 +273,7 @@ describe("InsightFacade", function () {
 				{
 					id: "ubc",
 					kind: InsightDatasetKind.Sections,
-					numRows: 5944,
+					numRows: 64612,
 				},
 			]);
 		});

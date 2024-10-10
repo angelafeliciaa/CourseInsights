@@ -54,8 +54,13 @@ class ValidateDataset {
 				const jsonContent = JSON.parse(fileContent);
 				// Check if the section is valid
 				if (this.isValidSection(jsonContent)) {
-					const newSection = new Section(jsonContent);
-					validSections.push(newSection);
+					for (const section of jsonContent.result) {
+						if (!section.id || !section.Course || !section.Subject) {
+							continue;
+						}
+						const newSection = new Section(section);
+						validSections.push(newSection);
+					}
 				}
 			}
 		});
