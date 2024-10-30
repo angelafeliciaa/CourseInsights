@@ -12,6 +12,8 @@ import fs = require("fs-extra");
 import { QueryHelper } from "./QueryEngine/QueryHelper";
 import { Section } from "./Section";
 import PerformQuery from "./QueryEngine/PerformQuery";
+import { parseRooms } from "./RoomHelper";
+import { Room } from "./Room";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -88,30 +90,15 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
-		let jsonArray: [string, string, any[]][] = [];
 		await this.loadDatasetsFromDisk();
-		if (!/^[^_]+$/.test(id) || !id.trim()) {
-			throw new InsightError(`Invalid id: ${id}`);
-		}
+		this.validateId(id);
+
 		if (!this.existingDatasetIds.includes(id)) {
-			const validator = new ValidateDataset();
+			// const validator = new ValidateDataset();
 			if (kind === InsightDatasetKind.Sections) {
-				const processedDataset = await validator.validDataset(content);
-				if (processedDataset.length !== 0) {
-					if (this.existingDatasetIds.length !== 0) {
-						const json = await this.loadDataFromDisk("./data/section.json");
-						jsonArray = JSON.parse(json);
-					}
-				}
-				jsonArray.push([id, "section", processedDataset]);
-				const jsonString = JSON.stringify(jsonArray);
-				await this.saveDataToDisk(jsonString);
-				this.existingDatasetIds.push(id);
-
-				// Store the dataset in the datasets map
-				this.datasets.set(id, processedDataset);
-
-				return Array.from(this.existingDatasetIds);
+				return this.addSectionDataset(id, content);
+			} else if (kind === InsightDatasetKind.Rooms) {
+				return this.addRoomDataset(id, content);
 			} else {
 				throw new InsightError(`different kind`);
 			}
@@ -139,7 +126,7 @@ export default class InsightFacade implements IInsightFacade {
 			// let promise3 = await saveDataToDisk(jsonFromString);
 
 			// Remove the dataset from the datasets map
-			this.datasets.delete(id);
+			this.datasets["delete"](id);
 
 			return id;
 		} else {
@@ -184,6 +171,12 @@ export default class InsightFacade implements IInsightFacade {
 		}
 	}
 
+	private validateId(id: string): void {
+		if (!/^[^_]+$/.test(id) || !id.trim()) {
+			throw new InsightError(`Invalid id: ${id}`);
+		}
+	}
+
 	private async loadDataFromDisk(filePath: string): Promise<any> {
 		try {
 			const dataString = await fs.readJSON(filePath);
@@ -202,6 +195,41 @@ export default class InsightFacade implements IInsightFacade {
 		} catch (error) {
 			throw new Error(`saveDataToDisk: ${error}`);
 		}
+	}
+
+	private async addSectionDataset(id: string, content: string): Promise<string[]> {
+		let jsonArray: [string, string, any[]][] = [];
+		const validator = new ValidateDataset();
+		const processedDataset = await validator.validDataset(content);
+		if (processedDataset.length !== 0) {
+			if (this.existingDatasetIds.length !== 0) {
+				const json = await this.loadDataFromDisk("./data/section.json");
+				jsonArray = JSON.parse(json);
+			}
+		}
+		jsonArray.push([id, "section", processedDataset]);
+		const jsonString = JSON.stringify(jsonArray);
+		await this.saveDataToDisk(jsonString);
+		this.existingDatasetIds.push(id);
+		this.datasets.set(id, processedDataset);
+		return Array.from(this.existingDatasetIds);
+	}
+
+	private async addRoomDataset(id: string, content: string): Promise<string[]> {
+		let jsonArray: [string, string, any[]][] = [];
+		const listOfRooms: Room[] = await parseRooms(content);
+		if (listOfRooms.length !== 0) {
+			if (this.existingDatasetIds.length !== 0) {
+				const json = await this.loadDataFromDisk("./data/data.json");
+				jsonArray = JSON.parse(json);
+			}
+			jsonArray.push([id, "room", listOfRooms]);
+			const jsonString = JSON.stringify(jsonArray);
+			await this.saveDataToDisk(jsonString);
+			this.existingDatasetIds.push(id);
+			return Array.from(this.existingDatasetIds);
+		}
+		return Promise.reject(new InsightError("Less than 0 valid rooms"));
 	}
 
 	private async createInsightData(id: string, kind: string, numRows: number): Promise<InsightDataset> {
