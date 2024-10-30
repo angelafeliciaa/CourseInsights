@@ -125,7 +125,7 @@ export default class InsightFacade implements IInsightFacade {
 			// let promise3 = await saveDataToDisk(jsonFromString);
 
 			// Remove the dataset from the datasets map
-			this.datasets["delete"](id);
+			this.datasets.delete(id);
 
 			return id;
 		} else {
