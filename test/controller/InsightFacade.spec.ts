@@ -406,5 +406,13 @@ describe("InsightFacade", function () {
 
 		// valid, shows no results
 		// it("[valid/validNoResults.json] Query no results", checkQuery);
+
+		// test for aggregations
+		it("[invalid/agg/invalidApply.json] Invalid APPLY token", checkQuery);
+		it("[invalid/agg/invalidAvg.json] Invalid AVG", checkQuery);
+
+		it("[valid/validAvg.json] Valid AVG", checkQuery);
+
+		// it("[valid/validRoom.json] Query valid room", checkQuery);
 	});
 });

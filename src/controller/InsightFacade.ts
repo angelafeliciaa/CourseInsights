@@ -9,9 +9,9 @@ import {
 } from "./IInsightFacade";
 import JSZip = require("jszip");
 import fs = require("fs-extra");
-import { QueryHelper } from "./QueryHelper";
+import { QueryHelper } from "./QueryEngine/QueryHelper";
 import { Section } from "./Section";
-import PerformQuery from "./PerformQuery";
+import PerformQuery from "./QueryEngine/PerformQuery";
 
 /**
  * This is the main programmatic entry point for the project.
