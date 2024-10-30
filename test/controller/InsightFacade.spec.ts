@@ -30,6 +30,7 @@ describe("InsightFacade", function () {
 	let invalidContent: string;
 	let removeResult: string;
 	let removeKey: string;
+	let buildings: string;
 
 	before(async function () {
 		// This block runs once and loads the datasets.
@@ -38,6 +39,7 @@ describe("InsightFacade", function () {
 		invalidContent = await getContentFromArchives("invalidContent.zip");
 		removeResult = await getContentFromArchives("removeResult.zip");
 		removeKey = await getContentFromArchives("removeKey.zip");
+		buildings = await getContentFromArchives("campus.zip");
 
 		// Just in case there is anything hanging around from a previous run of the test suite
 		await clearDisk();
@@ -104,13 +106,6 @@ describe("InsightFacade", function () {
 			} catch (err) {
 				return expect(err).to.be.instanceOf(InsightError);
 			}
-
-			// const result = facade.addDataset(
-			// 	"hello",
-			// 	sections,
-			// 	InsightDatasetKind.Sections
-			// );
-			// return expect(result).to.eventually.be.rejectedWith(InsightError);
 		});
 
 		it("should reject invalid json", async function () {
@@ -151,6 +146,12 @@ describe("InsightFacade", function () {
 			} catch (err) {
 				return expect(err).to.be.instanceOf(InsightError);
 			}
+		});
+
+		it("should add one room dataset", async function () {
+			const result = await facade.addDataset("hello", buildings, InsightDatasetKind.Rooms);
+			// check result correct
+			expect(result).to.have.members(["hello"]);
 		});
 	});
 

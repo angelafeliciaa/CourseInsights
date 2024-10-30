@@ -5,8 +5,7 @@ const parse5 = require("parse5");
 
 async function unpackRoomZip(content: string, path: string): Promise<[string, any][]> {
 	try {
-		const zip = new JSZip();
-		const zipContent = await zip.loadAsync(content, { base64: true });
+		const zipContent = await isValidZip(content);
 		if (zipContent.files[path]) {
 			const listOfPromises: Promise<string>[] = [];
 			const listOfRooms: [string, string][] = [];
@@ -32,41 +31,56 @@ async function unpackRoomZip(content: string, path: string): Promise<[string, an
 	}
 }
 
-function searchForTables(node: any, type: string): any {
-	if (node.tagName === "table") {
-		if (isTargetTable(node)) {
-			return node;
-		}
+async function isValidZip(base64Str: string): Promise<JSZip> {
+	try {
+		const zip = new JSZip();
+		const zipContent = await zip.loadAsync(base64Str, { base64: true });
+		return zipContent;
+	} catch {
+		throw new InsightError("Invalid zip file");
 	}
-
-	if (node.childNodes && node.childNodes.length > 0) {
-		for (const childNode of node.childNodes) {
-			const resultNode = searchForTables(childNode, type);
-			if (resultNode !== null) {
-				return resultNode;
-			}
-		}
-	}
-	return null;
 }
 
-function processBuildingTable(table: any): any[] {
+function searchForTables(node: any, type: string): any {
+	try {
+		// Check the current node itself.
+		if (node.tagName === "table" && isTargetTable(node, type)) {
+			return node;
+		}
+		// If the current node has child nodes, recurse through them.
+		if (node.childNodes && node.childNodes.length > 0) {
+			for (const childNode of node.childNodes) {
+				const resultNode = searchForTables(childNode, type);
+				if (resultNode !== null) {
+					// Return as soon as a valid node is found.
+					return resultNode;
+				}
+			}
+		}
+		return null;
+	} catch (e) {
+		throw new InsightError(`SearchForTables: ${e}`);
+	}
+}
+
+function processBuildingTable(table: any): { fullname: string; shortname: string; address: string }[] {
 	return table.childNodes.flatMap((childNode: any) =>
 		childNode.nodeName === "tbody"
 			? childNode.childNodes
 					.filter((element: any) => element.nodeName === "tr")
 					.map((element: any) => ({
-						shortname: nodeSearch("views-field-field-building-code", element)
+						fullname: nodeSearch("views-field views-field-title", element).trim(),
+						shortname: nodeSearch("views-field views-field-field-building-code", element)
 							.trim()
 							.replace(/\s+/g, "")
 							.replace(/\W+/g, ""),
-						address: nodeSearch("views-field-field-building-address", element).trim(),
+						address: nodeSearch("views-field views-field-field-building-address", element).trim(),
 					}))
 			: []
 	);
 }
 
-function processRoomTable(validTable: any, building: { shortname: string; address: string }, fullname: string): Room[] {
+function processRoomTable(validTable: any, building: { fullname: string; shortname: string; address: string }): Room[] {
 	try {
 		return validTable.childNodes.flatMap((node: any) =>
 			node.nodeName === "tbody"
@@ -74,7 +88,7 @@ function processRoomTable(validTable: any, building: { shortname: string; addres
 						.filter((child: any) => child.nodeName === "tr")
 						.map((child: any) => {
 							const room = new Room(); // Assuming Room constructor can handle partial initialization
-							room.fullname = fullname;
+							room.fullname = building.fullname;
 							room.shortname = building.shortname;
 							room.address = building.address as string;
 							// const geo = geolocations.get(building.shortname) as GeoResponse;
@@ -99,12 +113,34 @@ export function getRoomInfo(element: any, room: Room): any {
 	room.seats = parseInt(nodeSearch("views-field views-field-field-room-capacity", element).trim(), 10);
 }
 
-function isTargetTable(node: any): boolean {
-	if (!node.childNodes) {
+function isTargetTable(tableNode: any, type: string): boolean {
+	// if (!node.childNodes) return false;
+	// const requiredClass = type === "building" ? "views-field views-field-title" : "views-field views-field-field-room-number";
+	// return node.childNodes.some((child: any) =>
+	//     child.attrs &&
+	//     child.attrs.some((attr: any) => attr.name === "class" && attr.value.includes(requiredClass))
+	// );
+	const requiredClasses =
+		type === "building"
+			? ["views-field-title", "views-field-field-building-code", "views-field-field-building-address"]
+			: ["views-field-field-room-number", "views-field-field-room-capacity", "views-field-field-room-type"];
+
+	// Function to check if any <td> elements within the table have the required classes
+	function hasRequiredClasses(node: any): boolean {
+		if (node.nodeName === "td" && node.attrs) {
+			const classAttr = node.attrs.find((attr: any) => attr.name === "class");
+			if (classAttr) {
+				return requiredClasses.some((cls) => classAttr.value.includes(cls));
+			}
+		}
+		if (node.childNodes) {
+			return node.childNodes.some((child: any) => hasRequiredClasses(child));
+		}
 		return false;
-	} else {
-		return true;
 	}
+
+	// Start searching from the table node
+	return hasRequiredClasses(tableNode);
 }
 
 export function nodeSearch(viewsFieldViewsFieldTitle: string, node: any): any {
@@ -142,9 +178,9 @@ export function nodeSearch(viewsFieldViewsFieldTitle: string, node: any): any {
 
 export async function parseRooms(content: any): Promise<Room[]> {
 	try {
-		const zip = await JSZip.loadAsync(content, { base64: true });
-		const filePromise = await zip.files["index.htm"].async("string");
-		const document = parse5.parse(filePromise);
+		const zip = await isValidZip(content);
+		const fileContent = await zip.files["index.htm"].async("string");
+		const document = parse5.parse(fileContent);
 
 		const table = searchForTables(document, "building");
 		const listOfBuildings = processBuildingTable(table);
@@ -156,13 +192,12 @@ export async function parseRooms(content: any): Promise<Room[]> {
 				return [];
 			}
 
-			const html = parse5.parse(document[1] as string);
+			const html = parse5.parse(roomDocument[1] as string);
 			const validTable = searchForTables(html, "room");
 			if (!validTable) {
 				return [];
 			}
-			const fullname = nodeSearch("building-info", html).trim();
-			return processRoomTable(validTable, building, fullname);
+			return processRoomTable(validTable, building);
 		});
 		return roomsData;
 	} catch (e) {
