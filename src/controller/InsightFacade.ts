@@ -11,6 +11,7 @@ import JSZip = require("jszip");
 import fs = require("fs-extra");
 import { QueryHelper } from "./QueryHelper";
 import { Section } from "./Section";
+import PerformQuery from "./PerformQuery";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -149,40 +150,9 @@ export default class InsightFacade implements IInsightFacade {
 	public readonly MAX_RESULTS = 5000;
 
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
-		// Create an instance of QueryHelper
-		const queryHelper = new QueryHelper(this.existingDatasetIds, this.datasets);
-
-		// Validate that the query is an object
-		queryHelper.checkValidQuery(query);
-
-		const queryObj = query as any; // Cast to any for easier access
-
-		// Get the dataset id from the query
-		const datasetId = queryHelper.getDatasetIdFromQuery(queryObj);
-
-		// Check that the dataset has been added
-		if (!this.existingDatasetIds.includes(datasetId)) {
-			throw new InsightError(`Dataset ${datasetId} not found.`);
-		}
-
-		// Get the dataset data
-		const datasetData = this.datasets.get(datasetId);
-		if (!datasetData) {
-			throw new InsightError(`Dataset data for ${datasetId} not found.`);
-		}
-
-		// Apply the WHERE clause to filter the data
-		const filteredData = queryHelper.applyWhereClause(datasetData, queryObj.WHERE, datasetId);
-
-		// Apply OPTIONS (COLUMNS, ORDER) to get the results
-		const results = queryHelper.applyOptions(filteredData, queryObj.OPTIONS, datasetId);
-
-		// Check if the results are too large
-		if (results.length > this.MAX_RESULTS) {
-			throw new ResultTooLargeError();
-		}
-
-		return results;
+		// Create an instance of PerformQuery
+		const performQuery = new PerformQuery(this.existingDatasetIds, this.datasets);
+		return await performQuery.execute(query); // Call the execute method
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {

@@ -1,11 +1,9 @@
 // QueryHelper.ts got from llm
-
 import { InsightError, InsightResult } from "./IInsightFacade";
 import { Section } from "./Section"; // Assuming Section class is in Section.ts
 
 type NumericSectionField = "avg" | "pass" | "fail" | "audit" | "year";
 type StringSectionField = "dept" | "id" | "instructor" | "title" | "uuid";
-// type SectionField = NumericSectionField | StringSectionField;
 
 export class QueryHelper {
 	private existingDatasetIds: string[];
@@ -35,15 +33,13 @@ export class QueryHelper {
 		if (!Array.isArray(query.OPTIONS.COLUMNS) || query.OPTIONS.COLUMNS.length === 0) {
 			throw new InsightError("COLUMNS must be a non-empty array.");
 		}
-		// Additional validation for ORDER can be added here
 		return true;
 	}
 
 	public getDatasetIdFromQuery(query: any): string {
 		const datasetIds = new Set<string>();
-
-		// Extract dataset IDs from COLUMNS
 		const columns = query.OPTIONS.COLUMNS;
+
 		for (const key of columns) {
 			if (typeof key !== "string") {
 				throw new InsightError("COLUMNS contains invalid key.");
@@ -52,7 +48,6 @@ export class QueryHelper {
 			datasetIds.add(id);
 		}
 
-		// Extract dataset IDs from WHERE
 		this.extractDatasetIdsFromWhere(query.WHERE, datasetIds);
 
 		if (datasetIds.size !== 1) {
