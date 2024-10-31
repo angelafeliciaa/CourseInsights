@@ -1,0 +1,39 @@
+{
+	"title": "Valid Multiple Apply",
+	"input": {
+    "WHERE": {
+      "IS": {
+        "sections_title": "algb*"
+      }
+    },
+    "OPTIONS": {
+      "COLUMNS": [
+        "sections_title",
+        "max",
+        "min"
+      ]
+    },
+    "TRANSFORMATIONS": {
+      "GROUP": [
+        "sections_title"
+      ],
+      "APPLY": [
+        {
+          "max": {
+            "MAX": "sections_avg"
+          }
+        },
+        {
+          "min": {
+            "MIN": "sections_avg"
+          }
+        }
+      ]
+    }
+  },
+	"errorExpected": false,
+	"expected": {"result": [
+    {"sections_title":"algbr & cod thry","max":72.26,"min":63.62},
+    {"sections_title":"algb topology i","max":99.78,"min":86},
+    {"sections_title":"algb geometry i","max":97.48,"min":88.75}]}
+}

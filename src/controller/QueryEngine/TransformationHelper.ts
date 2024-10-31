@@ -1,190 +1,112 @@
-// TransformationHelper.ts
-import { InsightError, InsightResult } from "../IInsightFacade";
-import { Section } from "../Section";
-import Decimal from "decimal.js";
+// // from llm
+// import { InsightError, InsightResult } from "../IInsightFacade";
+// import Decimal from "decimal.js";
 
-type ApplyToken = "MAX" | "MIN" | "AVG" | "COUNT" | "SUM";
-type NumericField = "avg" | "pass" | "fail" | "audit" | "year" | "lat" | "lon" | "seats";
+// export class TransformationHelper {
+// 	private static numericFields = new Set(["avg", "pass", "fail", "audit", "year", "lat", "lon", "seats"]);
 
-interface ApplyRule {
-	[applyKey: string]: {
-		[token in ApplyToken]?: string;
-	};
-}
+// 	public static transform(data: InsightResult[], group: string[], apply: any[]): InsightResult[] {
+// 		const groupedData = this.groupData(data, group);
+// 		return this.applyTransformations(groupedData, apply);
+// 	}
 
-export class TransformationHelper {
-	private static isNumericField(field: string): boolean {
-		const numericFields: NumericField[] = ["avg", "pass", "fail", "audit", "year", "lat", "lon", "seats"];
-		return numericFields.includes(field as NumericField);
-	}
+// 	private static groupData(data: InsightResult[], groupKeys: string[]): Map<string, InsightResult[]> {
+// 		const groups = new Map<string, InsightResult[]>();
 
-	public static validateColumnsWithGrouping(columns: string[], groupKeys: string[], applyRules: ApplyRule[]): void {
-		const applyKeys = new Set(applyRules.map((rule) => Object.keys(rule)[0]));
+// 		for (const item of data) {
+// 			// Create a key from the group values
+// 			const key = groupKeys.map((k) => `${k}:${item[k]}`).join("|");
 
-		for (const column of columns) {
-			const isGroupKey = groupKeys.includes(column);
-			const isApplyKey = applyKeys.has(column);
+// 			if (!groups.has(key)) {
+// 				groups.set(key, []);
+// 			}
+// 			groups.get(key)?.push(item);
+// 		}
 
-			if (!isGroupKey && !isApplyKey) {
-				throw new InsightError(`Column ${column} must be either a GROUP key or an APPLY key`);
-			}
-		}
-	}
+// 		return groups;
+// 	}
 
-	public static groupData(data: Section[], groupKeys: string[], datasetId: string): Map<string, Section[]> {
-		const groups = new Map<string, Section[]>();
+// 	private static applyTransformations(groups: Map<string, InsightResult[]>, applyRules: any[]): InsightResult[] {
+// 		const results: InsightResult[] = [];
 
-		for (const item of data) {
-			const groupValues = groupKeys.map((key) => {
-				const [id, field] = key.split("_");
-				if (id !== datasetId) {
-					throw new InsightError(`Invalid dataset ID in group key: ${key}`);
-				}
-				return `${field}:${item[field as keyof Section]}`;
-			});
+// 		groups.forEach((groupData, key) => {
+// 			const result: InsightResult = {};
 
-			const groupKey = groupValues.join("|");
-			if (!groups.has(groupKey)) {
-				groups.set(groupKey, []);
-			}
-			groups.get(groupKey)?.push(item);
-		}
+// 			// Restore group keys to result
+// 			const groupPairs = key.split("|");
+// 			for (const pair of groupPairs) {
+// 				const [field, value] = pair.split(":");
+// 				result[field] = isNaN(Number(value)) ? value : Number(value);
+// 			}
 
-		return groups;
-	}
+// 			// Apply transformations
+// 			for (const rule of applyRules) {
+// 				const applyKey = Object.keys(rule)[0];
+// 				const operation = Object.keys(rule[applyKey])[0];
+// 				const field = rule[applyKey][operation].split("_")[1];
 
-	public static applyTransformations(
-		groupedData: Map<string, Section[]>,
-		applyRules: ApplyRule[],
-		groupKeys: string[],
-		datasetId: string
-	): InsightResult[] {
-		this.validateApplyRules(applyRules);
-		const results: InsightResult[] = [];
+// 				if (operation !== "COUNT" && !this.numericFields.has(field)) {
+// 					throw new InsightError(`Field ${field} must be numeric for ${operation} operation`);
+// 				}
 
-		for (const [groupKey, groupItems] of groupedData) {
-			const result = this.createGroupResult(groupKey, groupKeys);
-			this.applyRulesToGroup(result, groupItems, applyRules, datasetId);
-			results.push(result);
-		}
+// 				const values = groupData.map((item) => item[field]);
+// 				result[applyKey] = this.performCalculation(operation, values);
+// 			}
 
-		return results;
-	}
+// 			results.push(result);
+// 		});
 
-	private static validateApplyRules(applyRules: ApplyRule[]): void {
-		const applyKeySet = new Set<string>();
-		for (const rule of applyRules) {
-			const applyKey = Object.keys(rule)[0];
-			if (applyKeySet.has(applyKey)) {
-				throw new InsightError(`Duplicate apply key: ${applyKey}`);
-			}
-			applyKeySet.add(applyKey);
-		}
-	}
+// 		return results;
+// 	}
 
-	private static createGroupResult(groupKey: string, groupKeys: string[]): InsightResult {
-		const result: InsightResult = {};
-		const groupValues = groupKey.split("|");
-		groupKeys.forEach((key, index) => {
-			const value = groupValues[index].split(":")[1];
-			result[key] = this.parseValue(value);
-		});
-		return result;
-	}
+// 	private static performCalculation(operation: string, values: any[]): number {
+// 		switch (operation) {
+// 			case "MAX":
+// 				return this.calculateMax(values as number[]);
+// 			case "MIN":
+// 				return this.calculateMin(values as number[]);
+// 			case "AVG":
+// 				return this.calculateAvg(values as number[]);
+// 			case "SUM":
+// 				return this.calculateSum(values as number[]);
+// 			case "COUNT":
+// 				return this.calculateCount(values);
+// 			default:
+// 				throw new InsightError(`Unknown operation: ${operation}`);
+// 		}
+// 	}
 
-	private static parseValue(value: string): string | number {
-		const numberValue = Number(value);
-		return isNaN(numberValue) ? value : numberValue;
-	}
+// 	public static calculateAvg(values: number[]): number {
+// 		let total = new Decimal(0);
+// 		// Step 1: Convert each value to Decimal and add
+// 		values.forEach((value) => {
+// 			total = total.add(new Decimal(value));
+// 		});
+// 		// Step 2: Calculate average with regular division
+// 		const avg = total.toNumber() / values.length;
+// 		// Step 3: Round to 2 decimal places and convert back to number
+// 		return Number(avg.toFixed(2));
+// 	}
 
-	private static applyRulesToGroup(
-		result: InsightResult,
-		groupItems: Section[],
-		applyRules: ApplyRule[],
-		datasetId: string
-	): void {
-		for (const rule of applyRules) {
-			const applyKey = Object.keys(rule)[0];
-			const applySpec = rule[applyKey];
-			const token = Object.keys(applySpec)[0] as ApplyToken;
-			const field = applySpec[token];
+// 	public static calculateSum(values: number[]): number {
+// 		let total = new Decimal(0);
+// 		// Convert each value to Decimal and add
+// 		values.forEach((value) => {
+// 			total = total.add(new Decimal(value));
+// 		});
+// 		// Round to 2 decimal places and convert back to number
+// 		return Number(total.toFixed(2));
+// 	}
 
-			if (!field) {
-				throw new InsightError(`Invalid apply rule specification for ${applyKey}`);
-			}
+// 	public static calculateMax(values: number[]): number {
+// 		return Math.max(...values);
+// 	}
 
-			const [id, fieldName] = field.split("_");
-			if (id !== datasetId) {
-				throw new InsightError(`Invalid dataset ID in apply rule: ${field}`);
-			}
+// 	public static calculateMin(values: number[]): number {
+// 		return Math.min(...values);
+// 	}
 
-			result[applyKey] = this.calculateApplyResult(token, groupItems, fieldName as keyof Section);
-		}
-	}
-
-	public static calculateAvg(values: number[]): number {
-		let total = new Decimal(0);
-		// Step 1: Convert each value to Decimal and add
-		values.forEach((value) => {
-			total = total.add(new Decimal(value));
-		});
-
-		// Step 2: Calculate average with regular division
-		const avg = total.toNumber() / values.length;
-
-		// Step 3: Round to 2 decimal places and convert back to number
-		return Number(avg.toFixed(2));
-	}
-
-	public static calculateSum(values: number[]): number {
-		let total = new Decimal(0);
-		// Convert each value to Decimal and add
-		values.forEach((value) => {
-			total = total.add(new Decimal(value));
-		});
-
-		// Round to 2 decimal places and convert back to number
-		return Number(total.toFixed(2));
-	}
-
-	public static calculateMax(values: number[]): number {
-		return Math.max(...values);
-	}
-
-	public static calculateMin(values: number[]): number {
-		return Math.min(...values);
-	}
-
-	public static calculateCount(values: any[]): number {
-		return new Set(values).size;
-	}
-
-	private static calculateApplyResult(token: ApplyToken, items: Section[], field: keyof Section): number {
-		const values = items.map((item) => item[field]);
-
-		if (token !== "COUNT") {
-			if (!this.isNumericField(field as string)) {
-				throw new InsightError(`${token} can only be applied to numeric fields`);
-			}
-			if (!values.every((value) => typeof value === "number")) {
-				throw new InsightError(`Invalid values for ${token} operation`);
-			}
-		}
-
-		const numericValues = values as number[];
-		switch (token) {
-			case "MAX":
-				return this.calculateMax(numericValues);
-			case "MIN":
-				return this.calculateMin(numericValues);
-			case "AVG":
-				return this.calculateAvg(numericValues);
-			case "SUM":
-				return this.calculateSum(numericValues);
-			case "COUNT":
-				return this.calculateCount(values);
-			default:
-				throw new InsightError(`Unsupported apply token: ${token}`);
-		}
-	}
-}
+// 	public static calculateCount(values: any[]): number {
+// 		return new Set(values).size;
+// 	}
+// }

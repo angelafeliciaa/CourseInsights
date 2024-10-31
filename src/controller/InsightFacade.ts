@@ -5,12 +5,10 @@ import {
 	InsightResult,
 	InsightError,
 	NotFoundError,
-	ResultTooLargeError,
 } from "./IInsightFacade";
 import fs = require("fs-extra");
-import { QueryHelper } from "./QueryEngine/QueryHelper";
 import { Section } from "./Section";
-import PerformQuery from "./QueryEngine/PerformQuery";
+import PerformQuery from "./PerformQuery";
 import { parseRooms } from "./RoomHelper";
 import { Room } from "./Room";
 import { ValidateDataset } from "./SectionsHelper";

@@ -36,11 +36,26 @@ export default class PerformQuery {
 		// Apply the WHERE clause to filter the data
 		const filteredData = queryHelper.applyWhereClause(datasetData, queryObj.WHERE, datasetId);
 
-		// Apply OPTIONS (COLUMNS, ORDER) to get the results
-		const results = queryHelper.applyOptions(filteredData, queryObj.OPTIONS, datasetId);
+		let results: InsightResult[];
+
+		// Check if TRANSFORMATIONS exist in the query
+		if ("TRANSFORMATIONS" in queryObj) {
+			results = queryHelper.applyOptionsWithTransformations(
+				filteredData,
+				queryObj.OPTIONS,
+				queryObj.TRANSFORMATIONS,
+				datasetId
+			);
+		} else {
+			// Apply OPTIONS (COLUMNS, ORDER) to get the results
+			results = queryHelper.applyOptions(filteredData, queryObj.OPTIONS, datasetId);
+		}
 
 		// Check if the results are too large
-		if (results.length > 5000) {
+
+		const resultTooLargeAmount = 5000;
+
+		if (results.length > resultTooLargeAmount) {
 			// Assuming MAX_RESULTS is 5000
 			throw new ResultTooLargeError();
 		}

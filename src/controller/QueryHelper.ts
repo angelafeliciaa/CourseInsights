@@ -1,17 +1,21 @@
 // QueryHelper.ts got from llm
+import Decimal from "decimal.js";
 import { InsightError, InsightResult } from "./IInsightFacade";
-import { Section } from "./Section"; // Assuming Section class is in Section.ts
+import { Section } from "./Section";
+import { FilterHelper } from "./QueryFilter";
 
 type NumericSectionField = "avg" | "pass" | "fail" | "audit" | "year";
-type StringSectionField = "dept" | "id" | "instructor" | "title" | "uuid";
+// type StringSectionField = "dept" | "id" | "instructor" | "title" | "uuid";
 
 export class QueryHelper {
 	private existingDatasetIds: string[];
 	private datasets: Map<string, Section[]>;
+	private filterHelper: FilterHelper;
 
 	constructor(existingDatasetIds: string[], datasets: Map<string, Section[]>) {
 		this.existingDatasetIds = existingDatasetIds;
 		this.datasets = datasets;
+		this.filterHelper = new FilterHelper();
 	}
 
 	public checkValidQuery(query: any): boolean {
@@ -50,11 +54,42 @@ export class QueryHelper {
 
 		this.extractDatasetIdsFromWhere(query.WHERE, datasetIds);
 
+		if ("TRANSFORMATIONS" in query) {
+			this.extractDatasetIdsFromTransformations(query.TRANSFORMATIONS, datasetIds);
+		}
+
 		if (datasetIds.size !== 1) {
 			throw new InsightError("Query references multiple datasets.");
 		}
 
 		return datasetIds.values().next().value;
+	}
+
+	private extractDatasetIdsFromTransformations(transformations: any, datasetIds: Set<string>): void {
+		const { GROUP, APPLY } = transformations;
+
+		// Extract from GROUP
+		for (const groupKey of GROUP) {
+			const [id] = groupKey.split("_");
+			datasetIds.add(id);
+		}
+
+		// Extract from APPLY
+		for (const applyRule of APPLY) {
+			const applyKey = Object.keys(applyRule)[0];
+			const applyTokenObj = applyRule[applyKey];
+
+			// Ensure applyTokenObj is of the correct type
+			if (typeof applyTokenObj !== "object" || applyTokenObj === null) {
+				throw new InsightError("Invalid APPLY token object.");
+			}
+
+			const applyToken = Object.keys(applyTokenObj)[0];
+			const applyField = applyTokenObj[applyToken];
+
+			const [id] = applyField.split("_");
+			datasetIds.add(id);
+		}
 	}
 
 	private extractDatasetIdsFromWhere(where: any, datasetIds: Set<string>): void {
@@ -84,145 +119,7 @@ export class QueryHelper {
 	}
 
 	public applyWhereClause(data: Section[], where: any, datasetId: string): Section[] {
-		if (Object.keys(where).length === 0) {
-			return data; // Return all data if WHERE is empty
-		}
-
-		const key = Object.keys(where)[0];
-		switch (key) {
-			case "AND":
-				return this.applyAnd(data, where[key], datasetId);
-			case "OR":
-				return this.applyOr(data, where[key], datasetId);
-			case "NOT":
-				return this.applyNot(data, where[key], datasetId);
-			case "LT":
-			case "GT":
-			case "EQ":
-				return this.applyMComparator(data, key, where[key], datasetId);
-			case "IS":
-				return this.applySComparator(data, where[key], datasetId);
-			default:
-				throw new InsightError("Invalid WHERE clause.");
-		}
-	}
-
-	private applyAnd(data: Section[], conditions: any[], datasetId: string): Section[] {
-		if (!Array.isArray(conditions) || conditions.length === 0) {
-			throw new InsightError("AND conditions must be a non-empty array.");
-		}
-		return conditions.reduce((result, condition) => this.applyWhereClause(result, condition, datasetId), data);
-	}
-
-	private applyOr(data: Section[], conditions: any[], datasetId: string): Section[] {
-		if (!Array.isArray(conditions) || conditions.length === 0) {
-			throw new InsightError("OR conditions must be a non-empty array.");
-		}
-		const resultSet = new Set<Section>();
-		for (const condition of conditions) {
-			const result = this.applyWhereClause(data, condition, datasetId);
-			result.forEach((item) => resultSet.add(item));
-		}
-		return Array.from(resultSet);
-	}
-
-	private applyNot(data: Section[], condition: any, datasetId: string): Section[] {
-		const matching = this.applyWhereClause(data, condition, datasetId);
-		return data.filter((item) => !matching.includes(item));
-	}
-
-	private applyMComparator(data: Section[], comparator: string, mComparator: any, datasetId: string): Section[] {
-		const mKey = Object.keys(mComparator)[0];
-		const value = mComparator[mKey];
-		if (typeof value !== "number") {
-			throw new InsightError("MComparator value must be a number.");
-		}
-
-		const [id, fieldStr] = mKey.split("_");
-		if (id !== datasetId) {
-			throw new InsightError("MComparator key must reference the correct dataset.");
-		}
-
-		const validFields: NumericSectionField[] = ["avg", "pass", "fail", "audit", "year"]; // Use shorthand array syntax
-		if (!validFields.includes(fieldStr as NumericSectionField)) {
-			throw new InsightError("Invalid field in MComparator.");
-		}
-
-		const field = fieldStr as NumericSectionField;
-
-		return data.filter((item) => {
-			const itemValue = item[field]; // TypeScript now knows itemValue is a number
-			switch (comparator) {
-				case "LT":
-					return itemValue < value;
-				case "GT":
-					return itemValue > value;
-				case "EQ":
-					return itemValue === value;
-				default:
-					throw new InsightError("Invalid comparator.");
-			}
-		});
-	}
-
-	private applySComparator(data: Section[], sComparator: any, datasetId: string): Section[] {
-		const sKey = Object.keys(sComparator)[0];
-		const value = sComparator[sKey];
-		if (typeof value !== "string") {
-			throw new InsightError("SComparator value must be a string.");
-		}
-
-		const [id, fieldStr] = sKey.split("_");
-		if (id !== datasetId) {
-			throw new InsightError("SComparator key must reference the correct dataset.");
-		}
-
-		const validFields: StringSectionField[] = ["dept", "id", "instructor", "title", "uuid"];
-		if (!validFields.includes(fieldStr as StringSectionField)) {
-			throw new InsightError("Invalid field in SComparator.");
-		}
-
-		if (this.isInvalidPattern(value)) {
-			throw new InsightError("Invalid wildcard usage in IS.");
-		}
-
-		const field = fieldStr as StringSectionField;
-
-		return data.filter((item) => this.matches(item[field], value));
-	}
-
-	private matches(itemValue: string, pattern: string): boolean {
-		// Handle wildcards at the start and/or end
-		let regexString = "^";
-		const escapedPattern = this.escapeRegExp(pattern.replace(/\*/g, ""));
-		if (pattern.startsWith("*")) {
-			regexString += ".*";
-		}
-		regexString += escapedPattern;
-		if (pattern.endsWith("*")) {
-			regexString += ".*";
-		}
-		regexString += "$";
-		const regex = new RegExp(regexString);
-		return regex.test(itemValue);
-	}
-
-	private isInvalidPattern(pattern: string): boolean {
-		const firstIndex = pattern.indexOf("*");
-		const lastIndex = pattern.lastIndexOf("*");
-		if (firstIndex !== -1 && firstIndex !== 0 && lastIndex !== pattern.length - 1) {
-			// '*' in the middle is invalid
-			return true;
-		}
-		if (pattern.slice(1, -1).includes("*")) {
-			// Multiple '*' in the middle is invalid
-			return true;
-		}
-		return false;
-	}
-
-	private escapeRegExp(string: string): string {
-		return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		return this.filterHelper.applyWhereClause(data, where, datasetId);
 	}
 
 	private mapResult(item: Section, columns: string[], datasetId: string): InsightResult {
@@ -263,21 +160,14 @@ export class QueryHelper {
 				if (!columns.includes(order)) {
 					throw new InsightError("ORDER key must be in COLUMNS.");
 				}
+				const orderKey = order;
 				results.sort((a, b) => {
-					if (a[order] < b[order]) {
+					if (a[orderKey] < b[orderKey]) {
 						return -1;
-					} else if (a[order] > b[order]) {
+					} else if (a[orderKey] > b[orderKey]) {
 						return 1;
 					} else {
-						// Secondary sort by 'sections_dept' alphabetically
-						const secondaryKey = "sections_dept";
-						if (a[secondaryKey] < b[secondaryKey]) {
-							return -1;
-						} else if (a[secondaryKey] > b[secondaryKey]) {
-							return 1;
-						} else {
-							return 0;
-						}
+						return 0;
 					}
 				});
 			} else if (typeof order === "object") {
@@ -292,6 +182,184 @@ export class QueryHelper {
 	public applyOptions(data: Section[], options: any, datasetId: string): InsightResult[] {
 		const columns = options.COLUMNS;
 		const results = data.map((item) => this.mapResult(item, columns, datasetId));
+
+		this.applyOrder(results, options, columns);
+
+		return results;
+	}
+
+	public applyTransformations(data: Section[], transformations: any, datasetId: string): Section[] {
+		if (!transformations || Object.keys(transformations).length === 0) {
+			return data;
+		}
+
+		const { GROUP, APPLY } = transformations;
+
+		if (!Array.isArray(GROUP) || GROUP.length === 0) {
+			throw new InsightError("GROUP must be a non-empty array.");
+		}
+
+		if (!Array.isArray(APPLY)) {
+			throw new InsightError("APPLY must be an array.");
+		}
+
+		// Group the data based on GROUP keys
+		const groupedData = this.groupData(data, GROUP, datasetId);
+
+		// Apply the transformations to each group
+		const transformedData = this.applyAggregations(groupedData, APPLY, datasetId);
+
+		return transformedData;
+	}
+
+	private groupData(data: Section[], groupKeys: string[], datasetId: string): Map<string, Section[]> {
+		const groupMap = new Map<string, Section[]>();
+
+		for (const item of data) {
+			let key = "";
+			for (const groupKey of groupKeys) {
+				const [id, fieldStr] = groupKey.split("_");
+				if (id !== datasetId) {
+					throw new InsightError("GROUP keys must reference the same dataset.");
+				}
+				key += item[fieldStr as keyof Section] + "|";
+			}
+			if (!groupMap.has(key)) {
+				groupMap.set(key, []);
+			}
+			groupMap.get(key)!.push(item);
+		}
+
+		return groupMap;
+	}
+
+	private initializeGroupResult(key: string, groupedDataKeys: string[], datasetId: string): any {
+		const result: any = {};
+		const keyValues = key.split("|").slice(0, -1);
+		for (let i = 0; i < keyValues.length; i++) {
+			const groupKey = groupedDataKeys[0].split("|")[i];
+			const [id] = groupKey.split("_");
+			if (id !== datasetId) {
+				throw new InsightError("GROUP keys must reference the same dataset.");
+			}
+			result[groupKey] = keyValues[i];
+		}
+		return result;
+	}
+
+	private applyAggregations(groupedData: Map<string, Section[]>, applyRules: any[], datasetId: string): any[] {
+		const results: any[] = [];
+		const groupedDataKeys = Array.from(groupedData.keys());
+
+		for (const [key, group] of groupedData) {
+			// Initialize result with group keys
+			const result = this.initializeGroupResult(key, groupedDataKeys, datasetId);
+
+			// Apply each aggregation rule
+			this.processApplyRules(group, applyRules, datasetId, result);
+
+			results.push(result);
+		}
+
+		return results;
+	}
+
+	private processApplyRules(group: Section[], applyRules: any[], datasetId: string, result: any): void {
+		for (const applyRule of applyRules) {
+			const applyKey = Object.keys(applyRule)[0];
+			const applyTokenObj = applyRule[applyKey];
+			const applyToken = Object.keys(applyTokenObj)[0];
+			const applyField = applyTokenObj[applyToken];
+
+			const [id, fieldStr] = applyField.split("_");
+			if (id !== datasetId) {
+				throw new InsightError("APPLY keys must reference the same dataset.");
+			}
+
+			switch (applyToken) {
+				case "AVG":
+					result[applyKey] = this.calculateAvg(group, fieldStr as NumericSectionField);
+					break;
+				case "SUM":
+					result[applyKey] = this.calculateSum(group, fieldStr as NumericSectionField);
+					break;
+				case "MIN":
+					result[applyKey] = this.calculateMin(group, fieldStr as NumericSectionField);
+					break;
+				case "MAX":
+					result[applyKey] = this.calculateMax(group, fieldStr as NumericSectionField);
+					break;
+				case "COUNT":
+					result[applyKey] = this.calculateCount(group, fieldStr as keyof Section);
+					break;
+				default:
+					throw new InsightError("Unsupported APPLY token.");
+			}
+		}
+	}
+
+	private calculateAvg(group: Section[], field: NumericSectionField): number {
+		let total = new Decimal(0);
+		for (const item of group) {
+			const decimalValue = new Decimal(item[field]);
+			total = total.add(decimalValue);
+		}
+		const avg = total.toNumber() / group.length;
+		const decimalPlace = 2;
+		const res = Number(new Decimal(avg).toFixed(decimalPlace));
+		return res;
+	}
+
+	private calculateSum(group: Section[], field: NumericSectionField): number {
+		let total = new Decimal(0);
+		for (const item of group) {
+			const decimalValue = new Decimal(item[field]);
+			total = total.add(decimalValue);
+		}
+		const decimalPlace = 2;
+		const res = Number(total.toFixed(decimalPlace));
+		return res;
+	}
+
+	private calculateMin(group: Section[], field: NumericSectionField): number {
+		return Math.min(...group.map((item) => item[field]));
+	}
+
+	private calculateMax(group: Section[], field: NumericSectionField): number {
+		return Math.max(...group.map((item) => item[field]));
+	}
+
+	private calculateCount(group: Section[], field: keyof Section): number {
+		return new Set(group.map((item) => item[field])).size;
+	}
+
+	public applyOptionsWithTransformations(
+		data: Section[],
+		options: any,
+		transformations: any,
+		datasetId: string
+	): InsightResult[] {
+		// First, apply transformations
+		const transformedData = this.applyTransformations(data, transformations, datasetId);
+
+		const columns = options.COLUMNS;
+		const results = transformedData.map((item: any) => {
+			const result: any = {};
+			for (const key of columns) {
+				if (key.includes("_")) {
+					// Deal with group keys
+					const [id] = key.split("_");
+					if (id !== datasetId) {
+						throw new InsightError("COLUMNS keys must reference the same dataset.");
+					}
+					result[key] = item[key];
+				} else {
+					// Deal with apply keys
+					result[key] = item[key];
+				}
+			}
+			return result;
+		});
 
 		this.applyOrder(results, options, columns);
 
