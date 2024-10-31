@@ -62,8 +62,7 @@ export default class InsightFacade implements IInsightFacade {
 			});
 
 			const jsonFromString = JSON.stringify(newJsons);
-			await this.saveDataToDisk(jsonFromString); // old version
-			// let promise3 = await saveDataToDisk(jsonFromString);
+			await this.saveDataToDisk(jsonFromString);
 
 			// Remove the dataset from the datasets map
 			this.datasets.delete(id);

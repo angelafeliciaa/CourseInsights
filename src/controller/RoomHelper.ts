@@ -1,6 +1,7 @@
 import { Room } from "./Room";
 import JSZip from "jszip";
 import { InsightError } from "./IInsightFacade";
+import { GeoResponse, getGeoLocations } from "./Geolocation";
 const parse5 = require("parse5");
 
 async function unpackRoomZip(content: string, path: string): Promise<[string, any][]> {
@@ -80,20 +81,24 @@ function processBuildingTable(table: any): { fullname: string; shortname: string
 	);
 }
 
-function processRoomTable(validTable: any, building: { fullname: string; shortname: string; address: string }): Room[] {
+function processRoomTable(
+	validTable: any,
+	building: { fullname: string; shortname: string; address: string },
+	geolocations: Map<string, GeoResponse>
+): Room[] {
 	try {
 		return validTable.childNodes.flatMap((node: any) =>
 			node.nodeName === "tbody"
 				? node.childNodes
 						.filter((child: any) => child.nodeName === "tr")
 						.map((child: any) => {
-							const room = new Room(); // Assuming Room constructor can handle partial initialization
+							const room = new Room();
 							room.fullname = building.fullname;
 							room.shortname = building.shortname;
 							room.address = building.address as string;
-							// const geo = geolocations.get(building.shortname) as GeoResponse;
-							// room.lat = geo.lat as number;
-							// room.lon = geo.lon as number;
+							const geo = geolocations.get(building.shortname) as GeoResponse;
+							room.lat = geo.lat as number;
+							room.lon = geo.lon as number;
 							getRoomInfo(child, room);
 							return room;
 						})
@@ -114,18 +119,11 @@ export function getRoomInfo(element: any, room: Room): any {
 }
 
 function isTargetTable(tableNode: any, type: string): boolean {
-	// if (!node.childNodes) return false;
-	// const requiredClass = type === "building" ? "views-field views-field-title" : "views-field views-field-field-room-number";
-	// return node.childNodes.some((child: any) =>
-	//     child.attrs &&
-	//     child.attrs.some((attr: any) => attr.name === "class" && attr.value.includes(requiredClass))
-	// );
 	const requiredClasses =
 		type === "building"
 			? ["views-field-title", "views-field-field-building-code", "views-field-field-building-address"]
 			: ["views-field-field-room-number", "views-field-field-room-capacity", "views-field-field-room-type"];
 
-	// Function to check if any <td> elements within the table have the required classes
 	function hasRequiredClasses(node: any): boolean {
 		if (node.nodeName === "td" && node.attrs) {
 			const classAttr = node.attrs.find((attr: any) => attr.name === "class");
@@ -139,14 +137,13 @@ function isTargetTable(tableNode: any, type: string): boolean {
 		return false;
 	}
 
-	// Start searching from the table node
 	return hasRequiredClasses(tableNode);
 }
 
 export function nodeSearch(viewsFieldViewsFieldTitle: string, node: any): any {
 	const queue: any[] = [node];
 	while (queue.length > 0) {
-		const currentNode: any = queue.pop(); // Remove and get the first element of the queue
+		const currentNode: any = queue.pop();
 		if (currentNode.attrs && currentNode.attrs.length > 0) {
 			const value = currentNode.attrs[0].value;
 
@@ -155,7 +152,6 @@ export function nodeSearch(viewsFieldViewsFieldTitle: string, node: any): any {
 			}
 
 			if (value === viewsFieldViewsFieldTitle) {
-				// room number special case hard code for now
 				if (viewsFieldViewsFieldTitle === "views-field views-field-field-room-number") {
 					return currentNode.childNodes[1].childNodes[0].value;
 				}
@@ -167,7 +163,6 @@ export function nodeSearch(viewsFieldViewsFieldTitle: string, node: any): any {
 		}
 
 		if (currentNode.childNodes) {
-			// Add all children to the queue
 			for (const child of currentNode.childNodes) {
 				queue.push(child);
 			}
@@ -184,6 +179,7 @@ export async function parseRooms(content: any): Promise<Room[]> {
 
 		const table = searchForTables(document, "building");
 		const listOfBuildings = processBuildingTable(table);
+		const geolocations = await getGeoLocations(listOfBuildings);
 
 		const rooms = await unpackRoomZip(content, "campus/discover/buildings-and-classrooms/");
 		const roomsData = rooms.flatMap((roomDocument) => {
@@ -197,7 +193,7 @@ export async function parseRooms(content: any): Promise<Room[]> {
 			if (!validTable) {
 				return [];
 			}
-			return processRoomTable(validTable, building);
+			return processRoomTable(validTable, building, geolocations);
 		});
 		return roomsData;
 	} catch (e) {
