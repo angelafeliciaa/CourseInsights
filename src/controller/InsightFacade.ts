@@ -120,7 +120,7 @@ export default class InsightFacade implements IInsightFacade {
 			return this.createInsightData(id, kind, value.length);
 		});
 		const results = await Promise.all(promises);
-		
+
 		dataset.push(...results);
 		return dataset;
 	}
@@ -211,7 +211,6 @@ export default class InsightFacade implements IInsightFacade {
 				kind: dataKind,
 				numRows: numRows,
 			};
-		
 		} else if (kind === "room") {
 			const dataKind = InsightDatasetKind.Rooms;
 			return {
