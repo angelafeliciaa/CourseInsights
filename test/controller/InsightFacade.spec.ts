@@ -278,6 +278,23 @@ describe("InsightFacade", function () {
 				},
 			]);
 		});
+
+		it("should list one dataset", async function () {
+			//setup
+			await facade.addDataset("ubc", buildings, InsightDatasetKind.Rooms);
+
+			// execution
+			const datasets = await facade.listDatasets();
+
+			// validation
+			expect(datasets).to.deep.equal([
+				{
+					id: "ubc",
+					kind: InsightDatasetKind.Rooms,
+					numRows: 364,
+				},
+			]);
+		});
 	});
 
 	describe("PerformQuery", function () {
