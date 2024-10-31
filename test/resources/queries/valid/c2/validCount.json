@@ -1,0 +1,35 @@
+{
+	"title": "Valid Count",
+	"input": {
+        "WHERE": {
+            "IS": {
+              "sections_dept": "korn"
+            }
+        },
+        "OPTIONS": {
+          "COLUMNS": [
+            "count"
+          ]
+        },
+        "TRANSFORMATIONS": {
+          "GROUP": [
+            "sections_title"
+          ],
+          "APPLY": [
+            { 
+              "count": {
+                "COUNT": "sections_avg"
+              }
+            }
+          ]
+        }
+      },
+	"errorExpected": false,
+	"expected": {
+    "result":[
+      {"count":6},
+      {"count":36},
+      {"count":17},
+      {"count":3},
+      {"count":2}]}
+}

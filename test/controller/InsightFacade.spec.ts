@@ -424,5 +424,21 @@ describe("InsightFacade", function () {
 
 		// valid, shows no results
 		// it("[valid/validNoResults.json] Query no results", checkQuery);
+
+		// test for aggregations
+		it("[invalid/c2/invalidApply.json] Invalid APPLY token", checkQuery);
+		it("[invalid/c2/invalidAvg.json] Invalid AVG", checkQuery);
+
+		it("[invalid/c2/invalidOrderNoDir.json] Invalid ORDER no direction", checkQuery);
+		it("[invalid/c2/invalidOrderNull.json] Invalid ORDER NULL", checkQuery);
+		it("[invalid/c2/invalidOptionsArray.json] Invalid options array", checkQuery);
+		it("[invalid/c2/invalidColumnsEmptyArray.json] Invalid columns empty array", checkQuery);
+		it("[invalid/c2/invalidColumnsKey.json] Invalid columns key", checkQuery);
+
+		it("[valid/c2/validAvg.json] Valid AVG", checkQuery);
+		it("[valid/c2/validCount.json] Valid Count", checkQuery);
+		it("[valid/c2/validMultipleApply.json] Valid Multiple Apply", checkQuery);
+
+		// it("[valid/validRoom.json] Query valid room", checkQuery);
 	});
 });

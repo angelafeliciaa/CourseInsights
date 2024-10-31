@@ -1,0 +1,28 @@
+{
+    "title": "Invalid columns empty array",
+    "input": {
+      "WHERE": {
+        "IS": {
+          "sections_title": "algb*"
+        }
+      },
+      "OPTIONS": {
+        "COLUMNS": []
+      },
+      "TRANSFORMATIONS": {
+        "GROUP": [
+          "sections_title"
+        ],
+        "APPLY": [
+          {
+            "max": {
+              "MAX": "sections_avg"
+            }
+          }
+        ]
+      }
+    },
+    "errorExpected": true,
+    "expected": "InsightError"
+  }
+  

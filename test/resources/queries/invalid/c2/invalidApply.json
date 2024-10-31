@@ -1,0 +1,25 @@
+{
+    "title": "Invalid APPLY token",
+    "input": {
+      "WHERE": {},
+      "OPTIONS": {
+        "COLUMNS": [
+          "sections_dept",
+          "invalidApply"
+        ]
+      },
+      "TRANSFORMATIONS": {
+        "GROUP": ["sections_dept"],
+        "APPLY": [
+          {
+            "invalidApply": {
+              "INVALID_TOKEN": "sections_avg"
+            }
+          }
+        ]
+      }
+    },
+    "errorExpected": true,
+    "expected": "InsightError"
+  }
+  
