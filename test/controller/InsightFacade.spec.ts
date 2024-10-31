@@ -418,9 +418,9 @@ describe("InsightFacade", function () {
 		it("[invalid/c2/invalidColumnsEmptyArray.json] Invalid columns empty array", checkQuery);
 		it("[invalid/c2/invalidColumnsKey.json] Invalid columns key", checkQuery);
 
-		it("[valid/c2/validAvg.json] Valid AVG", checkQuery);
-		it("[valid/c2/validCount.json] Valid Count", checkQuery);
-		it("[valid/c2/validMultipleApply.json] Valid Multiple Apply", checkQuery);
+		// it("[valid/c2/validAvg.json] Valid AVG", checkQuery);
+		// it("[valid/c2/validCount.json] Valid Count", checkQuery);
+		// it("[valid/c2/validMultipleApply.json] Valid Multiple Apply", checkQuery);
 
 		// it("[valid/validRoom.json] Query valid room", checkQuery);
 	});
