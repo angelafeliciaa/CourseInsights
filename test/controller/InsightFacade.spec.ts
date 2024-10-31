@@ -279,7 +279,7 @@ describe("InsightFacade", function () {
 			]);
 		});
 
-		it("should list one dataset", async function () {
+		it("should list one room dataset", async function () {
 			//setup
 			await facade.addDataset("ubc", buildings, InsightDatasetKind.Rooms);
 
