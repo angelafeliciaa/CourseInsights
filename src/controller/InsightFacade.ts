@@ -76,7 +76,7 @@ export default class InsightFacade implements IInsightFacade {
 	public readonly MAX_RESULTS = 5000;
 
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
-		// Create an instance of PerformQuery
+		// await this.loadDatasetsFromDisk();
 		const performQuery = new PerformQuery(this.existingDatasetIds, this.datasets);
 		return await performQuery.execute(query); // Call the execute method
 	}
@@ -174,6 +174,13 @@ export default class InsightFacade implements IInsightFacade {
 	private async createInsightData(id: string, kind: string, numRows: number): Promise<InsightDataset> {
 		if (kind === "section") {
 			const dataKind = InsightDatasetKind.Sections;
+			return {
+				id: id,
+				kind: dataKind,
+				numRows: numRows,
+			};
+		} else if (kind === "room") {
+			const dataKind = InsightDatasetKind.Rooms;
 			return {
 				id: id,
 				kind: dataKind,

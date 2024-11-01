@@ -1,0 +1,40 @@
+{
+	"title": "Invalid idk",
+	"input": {
+    "WHERE": {
+        "AND": [
+            {
+                "GT": {
+                    "section_avg": 70
+                }
+            },
+            {
+                "LT": {
+                    "section_avg": "heyo"
+                }
+            },
+            {
+                "NOT": {
+                    "EQ": {
+                        "section_audit": 80
+                    }
+                }
+            },
+            {
+                "GT": {
+                    "section_year": 2019
+                }
+            }
+        ]
+    },
+    "OPTIONS": {
+        "COLUMNS": [
+            "section_dept",
+            "sections_avg"
+        ],
+        "ORDER": "section_dept"
+    }
+},
+	"errorExpected": false,
+	"expected": "InsightError"
+}

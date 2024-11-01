@@ -278,6 +278,23 @@ describe("InsightFacade", function () {
 				},
 			]);
 		});
+
+		it("should list one room dataset", async function () {
+			//setup
+			await facade.addDataset("ubc", buildings, InsightDatasetKind.Rooms);
+
+			// execution
+			const datasets = await facade.listDatasets();
+
+			// validation
+			expect(datasets).to.deep.equal([
+				{
+					id: "ubc",
+					kind: InsightDatasetKind.Rooms,
+					numRows: 364,
+				},
+			]);
+		});
 	});
 
 	describe("PerformQuery", function () {
@@ -334,6 +351,7 @@ describe("InsightFacade", function () {
 			// Will *fail* if there is a problem reading ANY dataset.
 			const loadDatasetPromises: Promise<string[]>[] = [
 				facade.addDataset("sections", sections, InsightDatasetKind.Sections),
+				facade.addDataset("rooms", buildings, InsightDatasetKind.Rooms),
 			];
 
 			try {
@@ -406,6 +424,7 @@ describe("InsightFacade", function () {
 		// valid, but complex query
 
 		// valid, shows no results
+
 		// it("[valid/validNoResults.json] Query no results", checkQuery);
 
 		// test for aggregations
@@ -417,11 +436,19 @@ describe("InsightFacade", function () {
 		it("[invalid/c2/invalidOptionsArray.json] Invalid options array", checkQuery);
 		it("[invalid/c2/invalidColumnsEmptyArray.json] Invalid columns empty array", checkQuery);
 		it("[invalid/c2/invalidColumnsKey.json] Invalid columns key", checkQuery);
+		it("[invalid/c2/invalidGroupNull.json] Invalid GROUP NULL", checkQuery);
+		it("[invalid/c2/invalidApplyNotArray.json] Invalid APPLY not array", checkQuery);
+		it("[invalid/c2/invalidANDemptyarray.json] Invalid AND Empty array", checkQuery);
 
-		// it("[valid/c2/validAvg.json] Valid AVG", checkQuery);
-		// it("[valid/c2/validCount.json] Valid Count", checkQuery);
-		// it("[valid/c2/validMultipleApply.json] Valid Multiple Apply", checkQuery);
+		it("[valid/validNegation.json] Query valid negation", checkQuery);
 
-		// it("[valid/validRoom.json] Query valid room", checkQuery);
+		it("[invalid/c2/invalidDK.json] Invalid idk", checkQuery);
+
+		it("[valid/c2/validAvg.json] Valid AVG", checkQuery);
+		it("[valid/c2/validCount.json] Valid Count", checkQuery);
+		it("[valid/c2/validMultipleApply.json] Valid Multiple Apply", checkQuery);
+
+		it("[valid/c2/validRoom.json] Query valid room", checkQuery);
+		it("[valid/c2/validRoomAll.json] Query valid room all", checkQuery);
 	});
 });

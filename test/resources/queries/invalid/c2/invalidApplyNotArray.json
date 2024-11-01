@@ -1,0 +1,25 @@
+{
+    "title": "Invalid APPLY not array",
+    "input": {
+      "WHERE": {
+        "IS": {
+          "sections_title": "algb*"
+        }
+      },
+      "OPTIONS": {
+        "COLUMNS": [
+          "sections_title",
+          "overallAvg"
+        ]
+      },
+      "TRANSFORMATIONS": {
+        "GROUP": [
+          "sections_title"
+        ],
+        "APPLY": "overall_avg"
+      }
+    },
+    "errorExpected": true,
+    "expected": "InsightError"
+  }
+  
