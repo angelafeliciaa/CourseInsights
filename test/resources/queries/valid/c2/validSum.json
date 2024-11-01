@@ -1,0 +1,36 @@
+{
+	"title": "Valid Sum",
+	"input": {
+    "WHERE": {
+      "WHERE": {
+        "IS": {
+          "sections_dept": "korn"
+        }
+      },
+      "OPTIONS": {
+        "COLUMNS": [
+          "sections_title",
+          "sum"
+        ]
+      },
+      "TRANSFORMATIONS": {
+        "GROUP": [
+          "sections_title"
+        ],
+        "APPLY": [
+          {
+            "sum": {
+              "SUM": "sections_avg"
+            }
+          }
+        ]
+      }
+    }
+  },
+	"errorExpected": false,
+	"expected": [{"sections_title":"basic korean 2","sum":624.84},
+  {"sections_title":"basic korean","sum":3189.15},
+  {"sections_title":"intermed korean","sum":1836.23},
+  {"sections_title":"read:korn tpcs 1","sum":448.52},
+  {"sections_title":"read korn tpcs 2","sum":313.66}]
+}

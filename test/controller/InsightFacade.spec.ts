@@ -324,12 +324,16 @@ describe("InsightFacade", function () {
 				}
 			} catch (err) {
 				if (!errorExpected) {
+					// console.log(err);
+					// console.log(expected);
 					expect.fail(`performQuery threw unexpected error: ${err}`);
 				} else if (expected === "InsightError") {
 					expect(err).to.be.instanceOf(InsightError);
 				} else if (expected === "ResultTooLargeError") {
 					expect(err).to.be.instanceOf(ResultTooLargeError);
 				} else {
+					// console.log(err);
+					// console.log(expected);
 					expect.fail(`performQuery threw unexpected error: ${err}`);
 				}
 				// return expect.fail("Write your assertion(s) here."); // TODO: replace with your assertions
@@ -446,6 +450,7 @@ describe("InsightFacade", function () {
 
 		it("[valid/c2/validAvg.json] Valid AVG", checkQuery);
 		it("[valid/c2/validCount.json] Valid Count", checkQuery);
+		it("[valid/c2/validSum.json] Valid Sum", checkQuery);
 		it("[valid/c2/validMultipleApply.json] Valid Multiple Apply", checkQuery);
 
 		it("[valid/c2/validRoom.json] Query valid room", checkQuery);
