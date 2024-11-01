@@ -1,0 +1,40 @@
+{
+	"title": "preserve number",
+	"input": {
+		"WHERE": {
+		  "GT": {
+			"rooms_seats": 350
+		  }
+		},
+		"OPTIONS": {
+		  "COLUMNS": [
+			"minlat",
+			"rooms_lon"
+		  ],
+		  "ORDER": {
+			"dir": "UP",
+			"keys": [
+			  "rooms_lon"
+			]
+		  }
+		},
+		"TRANSFORMATIONS": {
+		  "GROUP": [
+			"rooms_lon"
+		  ],
+		  "APPLY": [
+			{
+			  "minlat": {
+				"MIN": "rooms_lat"
+			  }
+			}
+		  ]
+		}
+	  },
+	"errorExpected": false,
+	"expected": [
+		{"minlat":49.26207,"rooms_lon":-123.25314},
+		{"minlat":49.2661,"rooms_lon":-123.25165},
+		{"minlat":49.26478,"rooms_lon":-123.24673},
+		{"minlat":49.26047,"rooms_lon":-123.24467}]
+}
