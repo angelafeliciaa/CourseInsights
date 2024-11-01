@@ -206,7 +206,7 @@ export class QueryHelper {
 		}
 
 		// Group the data based on GROUP keys
-		const groupedData = this.groupData(data, GROUP, datasetId);
+		const groupedData = this.groupData(data, GROUP);
 
 		// Apply the transformations to each group
 		const transformedData = this.applyAggregations(groupedData, APPLY, datasetId);
@@ -214,7 +214,7 @@ export class QueryHelper {
 		return transformedData;
 	}
 
-	private groupData(data: Section[], groupKeys: string[], datasetId: string): Map<string, Section[]> {
+	private groupData(data: Section[], groupKeys: string[]): Map<string, Section[]> {
 		const groupMap = new Map<string, Section[]>();
 
 		for (const item of data) {
@@ -235,7 +235,7 @@ export class QueryHelper {
 		return groupMap;
 	}
 
-	private initializeGroupResult(key: string, groupedDataKeys: string[], datasetId: string): any {
+	private initializeGroupResult(key: string, groupedDataKeys: string[]): any {
 		const result: any = {};
 		const keyValues = key.split("|").slice(0, -1);
 		// console.log(groupedDataKeys)
@@ -261,7 +261,7 @@ export class QueryHelper {
 
 		for (const [key, group] of groupedData) {
 			// Initialize result with group keys
-			const result = this.initializeGroupResult(key, groupedDataKeys, datasetId);
+			const result = this.initializeGroupResult(key, groupedDataKeys);
 
 			// Apply each aggregation rule
 			this.processApplyRules(group, applyRules, datasetId, result);
