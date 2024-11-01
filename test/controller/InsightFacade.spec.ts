@@ -460,5 +460,9 @@ describe("InsightFacade", function () {
 		it("[invalid/c2/invalidDuplicateApply.json] Invalid duplicate apply", checkQuery);
 		it("[invalid/c2/invalidSortNoColumns.json] Invalid sort", checkQuery);
 
+		it("[invalid/c2/invalidApplyUnderscore.json] Invalid APPLY underscore", checkQuery);
+
+		
+
 	});
 });
