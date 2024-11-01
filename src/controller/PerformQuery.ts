@@ -39,8 +39,6 @@ export default class PerformQuery {
 		// Apply the WHERE clause to filter the data
 		const filteredData = queryHelper.applyWhereClause(datasetData, queryObj.WHERE, datasetId);
 
-		// console.log(filteredData);
-
 		let results: InsightResult[];
 
 		// Check if TRANSFORMATIONS exist in the query

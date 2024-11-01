@@ -3,9 +3,6 @@ import { InsightError } from "./IInsightFacade";
 import { Section } from "./Section";
 import { Room } from "./Room";
 
-// type NumericSectionField = "avg" | "pass" | "fail" | "audit" | "year";
-// type StringSectionField = "dept" | "id" | "instructor" | "title" | "uuid";
-
 export type DataType = Section | Room;
 
 export type NumericSectionField = "avg" | "pass" | "fail" | "audit" | "year";

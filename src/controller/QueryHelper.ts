@@ -1,7 +1,6 @@
 // QueryHelper.ts got from llm
 import { InsightError, InsightResult } from "./IInsightFacade";
 import { Section } from "./Section";
-import { Room } from "./Room";
 import { FilterHelper } from "./QueryFilter";
 import { DataType } from "./TypesConstants";
 import { AggregationHelper } from "./AggregationHelper";
@@ -87,25 +86,65 @@ export class QueryHelper {
 	private applyOrder(results: InsightResult[], options: any, columns: string[]): void {
 		if ("ORDER" in options) {
 			const order = options.ORDER;
+
 			if (typeof order === "string") {
-				if (!columns.includes(order)) {
-					throw new InsightError("ORDER key must be in COLUMNS.");
-				}
-				const orderKey = order;
-				results.sort((a, b) => {
-					if (a[orderKey] < b[orderKey]) {
-						return -1;
-					} else if (a[orderKey] > b[orderKey]) {
-						return 1;
-					} else {
-						return 0;
-					}
-				});
-			} else if (typeof order === "object") {
-				// Handle complex ordering if required
-				throw new InsightError("Complex ORDER not implemented.");
+				this.applySimpleOrder(results, order, columns);
+			} else if (typeof order === "object" && order !== null) {
+				this.applyComplexOrder(results, order, columns);
 			} else {
 				throw new InsightError("Invalid ORDER.");
+			}
+		}
+	}
+
+	private applySimpleOrder(results: InsightResult[], orderKey: string, columns: string[]): void {
+		if (!columns.includes(orderKey)) {
+			throw new InsightError("ORDER key must be in COLUMNS.");
+		}
+		results.sort((a, b) => {
+			if (a[orderKey] < b[orderKey]) {
+				return -1;
+			} else if (a[orderKey] > b[orderKey]) {
+				return 1;
+			} else {
+				return 0;
+			}
+		});
+	}
+
+	private applyComplexOrder(results: InsightResult[], order: any, columns: string[]): void {
+		const { dir, keys } = order;
+
+		// Validate 'dir' and 'keys'
+		this.validateOrderObject(dir, keys, columns);
+
+		const direction = dir === "UP" ? 1 : -1;
+
+		results.sort((a, b) => {
+			for (const key of keys) {
+				if (a[key] < b[key]) {
+					return -1 * direction;
+				} else if (a[key] > b[key]) {
+					return 1 * direction;
+				}
+				// If equal, continue to next key
+			}
+			return 0; // All keys are equal
+		});
+	}
+
+	private validateOrderObject(dir: string, keys: string[], columns: string[]): void {
+		if (!dir || !keys || !Array.isArray(keys) || keys.length === 0) {
+			throw new InsightError("Invalid ORDER object.");
+		}
+		if (dir !== "UP" && dir !== "DOWN") {
+			throw new InsightError("Invalid ORDER direction. Must be 'UP' or 'DOWN'.");
+		}
+
+		// Check that all ORDER keys are included in COLUMNS
+		for (const key of keys) {
+			if (!columns.includes(key)) {
+				throw new InsightError("ORDER keys must be in COLUMNS.");
 			}
 		}
 	}
@@ -134,9 +173,11 @@ export class QueryHelper {
 
 		// Group the data based on GROUP keys
 		const groupedData = this.groupData(data, GROUP);
+		// console.log(groupedData);
 
 		// Apply the transformations to each group
 		const transformedData = this.applyAggregations(groupedData, APPLY, datasetId, GROUP);
+		// console.log(transformedData);
 
 		return transformedData;
 	}
@@ -272,6 +313,8 @@ export class QueryHelper {
 		datasetId: string
 	): InsightResult[] {
 		const transformedData = this.applyTransformations(data, transformations, datasetId);
+
+		// console.log(transformedData);
 
 		const columns = options.COLUMNS;
 		const results = transformedData.map((item: any) => {
