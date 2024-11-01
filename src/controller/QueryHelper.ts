@@ -37,6 +37,8 @@ export class QueryHelper {
 		if (!Array.isArray(query.OPTIONS.COLUMNS) || query.OPTIONS.COLUMNS.length === 0) {
 			throw new InsightError("COLUMNS must be a non-empty array.");
 		}
+
+		// check if from same dataset
 		return true;
 	}
 
@@ -58,9 +60,9 @@ export class QueryHelper {
 			this.extractDatasetIdsFromTransformations(query.TRANSFORMATIONS, datasetIds);
 		}
 
-		if (datasetIds.size !== 1) {
-			throw new InsightError("Query references multiple datasets.");
-		}
+		// if (datasetIds.size !== 1) {
+		// 	throw new InsightError("Query references multiple datasets.");
+		// }
 
 		return datasetIds.values().next().value;
 	}
@@ -204,7 +206,7 @@ export class QueryHelper {
 		}
 
 		// Group the data based on GROUP keys
-		const groupedData = this.groupData(data, GROUP, datasetId);
+		const groupedData = this.groupData(data, GROUP);
 
 		// Apply the transformations to each group
 		const transformedData = this.applyAggregations(groupedData, APPLY, datasetId);
@@ -212,16 +214,16 @@ export class QueryHelper {
 		return transformedData;
 	}
 
-	private groupData(data: Section[], groupKeys: string[], datasetId: string): Map<string, Section[]> {
+	private groupData(data: Section[], groupKeys: string[]): Map<string, Section[]> {
 		const groupMap = new Map<string, Section[]>();
 
 		for (const item of data) {
 			let key = "";
 			for (const groupKey of groupKeys) {
-				const [id, fieldStr] = groupKey.split("_");
-				if (id !== datasetId) {
-					throw new InsightError("GROUP keys must reference the same dataset.");
-				}
+				const [fieldStr] = groupKey.split("_");
+				// if (id !== datasetId) {
+				// 	throw new InsightError("GROUP keys must reference the same dataset.");
+				// }
 				key += item[fieldStr as keyof Section] + "|";
 			}
 			if (!groupMap.has(key)) {
@@ -233,15 +235,21 @@ export class QueryHelper {
 		return groupMap;
 	}
 
-	private initializeGroupResult(key: string, groupedDataKeys: string[], datasetId: string): any {
+	private initializeGroupResult(key: string, groupedDataKeys: string[]): any {
 		const result: any = {};
 		const keyValues = key.split("|").slice(0, -1);
+		// console.log(groupedDataKeys)
 		for (let i = 0; i < keyValues.length; i++) {
 			const groupKey = groupedDataKeys[0].split("|")[i];
-			const [id] = groupKey.split("_");
-			if (id !== datasetId) {
-				throw new InsightError("GROUP keys must reference the same dataset.");
-			}
+			// console.log(groupKey);
+
+			// const [id] = groupKey.split("_");
+
+			//console.log(datasetId);
+
+			// if (id !== datasetId) {
+			// 	throw new InsightError("GROUP keys must reference the same dataset.");
+			// }
 			result[groupKey] = keyValues[i];
 		}
 		return result;
@@ -253,7 +261,7 @@ export class QueryHelper {
 
 		for (const [key, group] of groupedData) {
 			// Initialize result with group keys
-			const result = this.initializeGroupResult(key, groupedDataKeys, datasetId);
+			const result = this.initializeGroupResult(key, groupedDataKeys);
 
 			// Apply each aggregation rule
 			this.processApplyRules(group, applyRules, datasetId, result);
@@ -339,7 +347,6 @@ export class QueryHelper {
 		transformations: any,
 		datasetId: string
 	): InsightResult[] {
-		// First, apply transformations
 		const transformedData = this.applyTransformations(data, transformations, datasetId);
 
 		const columns = options.COLUMNS;

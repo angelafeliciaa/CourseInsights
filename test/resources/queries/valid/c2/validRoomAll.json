@@ -1,0 +1,73 @@
+{
+	"title": "Query valid room all",
+	"input": {
+		"WHERE": {
+		  "AND": [
+			{
+			  "IS": {
+				"rooms_furniture": "*Tables*"
+			  }
+			},
+			{
+			  "GT": {
+				"rooms_seats": 300
+			  }
+			}
+		  ]
+		},
+		"OPTIONS": {
+		  "COLUMNS": [
+			"rooms_shortname",
+			"maxSeats",
+			"minSeats",
+			"sumSeats",
+			"avgSeats",
+			"countSeats"
+		  ],
+		  "ORDER": {
+			"dir": "DOWN",
+			"keys": [
+			  "maxSeats"
+			]
+		  }
+		},
+		"TRANSFORMATIONS": {
+		  "GROUP": [
+			"rooms_shortname"
+		  ],
+		  "APPLY": [
+			{
+			  "maxSeats": {
+				"MAX": "rooms_seats"
+			  }
+			},
+			{
+			  "minSeats": {
+				"MIN": "rooms_seats"
+			  }
+			},
+			{
+			  "avgSeats": {
+				"AVG": "rooms_seats"
+			  }
+			},
+			{
+			  "sumSeats": {
+				"SUM": "rooms_seats"
+			  }
+			},
+			{
+			  "countSeats": {
+				"COUNT": "rooms_seats"
+			  }
+			}
+		  ]
+		}
+	  },
+	"errorExpected": false,
+	"expected": [
+		{"rooms_shortname":"OSBO","maxSeats":442,"minSeats":442,"sumSeats":442,"avgSeats":442,"countSeats":1},
+		{"rooms_shortname":"HEBB","maxSeats":375,"minSeats":375,"sumSeats":375,"avgSeats":375,"countSeats":1},
+		{"rooms_shortname":"LSC","maxSeats":350,"minSeats":350,"sumSeats":700,"avgSeats":350,"countSeats":1}
+	]
+}

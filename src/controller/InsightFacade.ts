@@ -75,7 +75,7 @@ export default class InsightFacade implements IInsightFacade {
 	public readonly MAX_RESULTS = 5000;
 
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
-		// Create an instance of PerformQuery
+		// await this.loadDatasetsFromDisk();
 		const performQuery = new PerformQuery(this.existingDatasetIds, this.datasets);
 		return await performQuery.execute(query); // Call the execute method
 	}
