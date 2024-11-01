@@ -1,19 +1,11 @@
 // QueryHelper.ts got from llm
-import Decimal from "decimal.js";
 import { InsightError, InsightResult } from "./IInsightFacade";
 import { Section } from "./Section";
 import { Room } from "./Room";
 import { FilterHelper } from "./QueryFilter";
-import {
-	DataType,
-	NumericRoomField,
-	NumericSectionField,
-	StringRoomField,
-	StringSectionField,
-	validRoomFields,
-	validSectionFields,
-} from "./TypesConstants";
+import { DataType } from "./TypesConstants";
 import { AggregationHelper } from "./AggregationHelper";
+import { ValidationHelper } from "./ValidationHelper";
 
 export class QueryHelper {
 	private existingDatasetIds: string[];
@@ -163,20 +155,6 @@ export class QueryHelper {
 		return this.filterHelper.applyWhereClause(data, where, datasetId);
 	}
 
-	private validateField(fieldStr: string, item: DataType): void {
-		if (item instanceof Section) {
-			if (!validSectionFields.includes(fieldStr as keyof Section)) {
-				throw new InsightError("Invalid field in COLUMNS for Section.");
-			}
-		} else if (item instanceof Room) {
-			if (!validRoomFields.includes(fieldStr as keyof Room)) {
-				throw new InsightError("Invalid field in COLUMNS for Room.");
-			}
-		} else {
-			throw new InsightError("Unknown data type.");
-		}
-	}
-
 	private mapResult(item: DataType, columns: string[], datasetId: string): InsightResult {
 		const result: any = {};
 		for (const key of columns) {
@@ -187,7 +165,7 @@ export class QueryHelper {
 			}
 
 			// Validate the field
-			this.validateField(fieldStr, item);
+			ValidationHelper.validateField(fieldStr, item);
 
 			// Assign the value to the result
 			result[key] = (item as any)[fieldStr];
@@ -327,7 +305,7 @@ export class QueryHelper {
 		}
 
 		// Check if the field is valid for the data type
-		if (!this.isValidField(fieldStr, isSection)) {
+		if (!ValidationHelper.isValidField(fieldStr, isSection)) {
 			throw new InsightError(`Invalid field ${fieldStr} for ${isSection ? "Section" : "Room"}`);
 		}
 
@@ -344,19 +322,19 @@ export class QueryHelper {
 	): void {
 		switch (applyToken) {
 			case "AVG":
-				this.validateNumericField(fieldStr, validNumericFields, applyToken);
+				ValidationHelper.validateNumericField(fieldStr, validNumericFields, applyToken);
 				result[applyKey] = AggregationHelper.calculateAvg(group, fieldStr as any);
 				break;
 			case "SUM":
-				this.validateNumericField(fieldStr, validNumericFields, applyToken);
+				ValidationHelper.validateNumericField(fieldStr, validNumericFields, applyToken);
 				result[applyKey] = AggregationHelper.calculateSum(group, fieldStr as any);
 				break;
 			case "MIN":
-				this.validateNumericField(fieldStr, validNumericFields, applyToken);
+				ValidationHelper.validateNumericField(fieldStr, validNumericFields, applyToken);
 				result[applyKey] = AggregationHelper.calculateMin(group, fieldStr as any);
 				break;
 			case "MAX":
-				this.validateNumericField(fieldStr, validNumericFields, applyToken);
+				ValidationHelper.validateNumericField(fieldStr, validNumericFields, applyToken);
 				result[applyKey] = AggregationHelper.calculateMax(group, fieldStr as any);
 				break;
 			case "COUNT":
@@ -364,12 +342,6 @@ export class QueryHelper {
 				break;
 			default:
 				throw new InsightError("Unsupported APPLY token.");
-		}
-	}
-
-	private validateNumericField(fieldStr: string, validNumericFields: string[], applyToken: string): void {
-		if (!validNumericFields.includes(fieldStr)) {
-			throw new InsightError(`${applyToken} can only be applied to numeric fields`);
 		}
 	}
 
@@ -381,64 +353,6 @@ export class QueryHelper {
 			this.processApplyRule(group, applyRule, datasetId, result, isSection, validNumericFields);
 		}
 	}
-
-	private isValidField(field: string, isSection: boolean): boolean {
-		const validSectionFields = ["uuid", "id", "title", "instructor", "dept", "year", "avg", "pass", "fail", "audit"];
-
-		const validRoomFields = [
-			"fullname",
-			"shortname",
-			"number",
-			"name",
-			"address",
-			"lat",
-			"lon",
-			"seats",
-			"type",
-			"furniture",
-			"href",
-		];
-
-		return isSection ? validSectionFields.includes(field) : validRoomFields.includes(field);
-	}
-
-	// private calculateAvg(group: DataType[], field: NumericSectionField | NumericRoomField): number {
-	// 	let total = new Decimal(0);
-	// 	for (const item of group) {
-	// 		const decimalValue = new Decimal((item as any)[field]);
-	// 		total = total.add(decimalValue);
-	// 	}
-	// 	const avg = total.toNumber() / group.length;
-	// 	const decimalPlace = 2;
-	// 	const res = Number(new Decimal(avg).toFixed(decimalPlace));
-	// 	return res;
-	// }
-
-	// private calculateSum(group: DataType[], field: NumericSectionField | NumericRoomField): number {
-	// 	let total = new Decimal(0);
-	// 	for (const item of group) {
-	// 		const decimalValue = new Decimal((item as any)[field]);
-	// 		total = total.add(decimalValue);
-	// 	}
-	// 	const decimalPlace = 2;
-	// 	const res = Number(total.toFixed(decimalPlace));
-	// 	return res;
-	// }
-
-	// private calculateMin(group: DataType[], field: NumericSectionField | NumericRoomField): number {
-	// 	return Math.min(...group.map((item) => (item as any)[field]));
-	// }
-
-	// private calculateMax(group: DataType[], field: NumericSectionField | NumericRoomField): number {
-	// 	return Math.max(...group.map((item) => (item as any)[field]));
-	// }
-
-	// private calculateCount(
-	// 	group: DataType[],
-	// 	field: NumericSectionField | NumericRoomField | StringSectionField | StringRoomField
-	// ): number {
-	// 	return new Set(group.map((item) => (item as any)[field])).size;
-	// }
 
 	public applyOptionsWithTransformations(
 		data: DataType[],
