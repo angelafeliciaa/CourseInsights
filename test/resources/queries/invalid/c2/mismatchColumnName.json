@@ -1,0 +1,59 @@
+{
+    "title": "Mismatch Column Name",
+    "input": {
+        "WHERE": {
+          "OR": [
+            {
+              "IS": {
+                "rooms_furniture": "*Tables*"
+              }
+            },
+            {
+              "EQ": {
+                "rooms_seats": 50
+              }
+            }
+          ]
+        },
+        "OPTIONS": {
+          "COLUMNS": [
+            "rooms_fullname",
+            "rooms_shortname",
+            "maxSeats",
+            "totalSeats",
+            "roomTypes"
+          ],
+          "ORDER": {
+            "dir": "UP",
+            "keys": [
+              "roomTypes"
+            ]
+          }
+        },
+        "TRANSFORMATIONS": {
+          "GROUP": [
+            "rooms_fullname",
+            "rooms_shortname"
+          ],
+          "APPLY": [
+            {
+              "maxSeats": {
+                "MAX": "rooms_seats"
+              }
+            },
+            {
+              "totalSeats": {
+                "SUM": "rooms_seats"
+              }
+            },
+            {
+              "roomType": {
+                "COUNT": "rooms_type"
+              }
+            }
+          ]
+        }
+    },
+    "errorExpected": true,
+    "expected": "InsightError"
+}

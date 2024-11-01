@@ -448,6 +448,7 @@ describe("InsightFacade", function () {
 		it("[invalid/c2/invalidMaxNumeric.json] Invalid APPLY with MAX on Non-numeric Field", checkQuery);
 		it("[invalid/c2/invalidFieldColumns.json] Invalid Field in COLUMNS for Room", checkQuery);
 		it("[invalid/c2/invalidGroupColumns.json] Invalid Field in GROUP for Room Dataset", checkQuery);
+		it("[invalid/c2/mismatchColumnName.json] Mismatch Column Name", checkQuery);
 
 		it("[valid/validNegation.json] Query valid negation", checkQuery);
 
