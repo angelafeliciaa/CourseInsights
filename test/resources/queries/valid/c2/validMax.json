@@ -1,0 +1,739 @@
+{
+	"title": "Valid MAX",
+	"input": {
+        "WHERE": {
+            "AND": [
+                {"IS": {
+                    "rooms_type": "*Small Group*"
+                }},
+                {"IS": {
+                    "rooms_furniture": "*Tables*"
+                }}
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+            "rooms_furniture",
+            "maxSeats",
+            "rooms_name"
+            ],
+            "ORDER": "maxSeats"
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": [
+            "rooms_furniture",
+            "rooms_name"
+            ],
+            "APPLY": [
+            {
+                "maxSeats": {
+                "MAX": "rooms_seats"
+                }
+            }
+            ]
+        }
+      },
+	"errorExpected": false,
+	"expected":[
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":6,
+              "rooms_name":"MCML_360A"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":6,
+              "rooms_name":"MCML_360B"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":7,
+              "rooms_name":"PHRM_3112"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":7,
+              "rooms_name":"PHRM_3114"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":7,
+              "rooms_name":"PHRM_3115"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":7,
+              "rooms_name":"PHRM_3118"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":7,
+              "rooms_name":"PHRM_3120"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":7,
+              "rooms_name":"PHRM_3122"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":7,
+              "rooms_name":"PHRM_3124"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"IBLC_192"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"IBLC_193"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"IBLC_194"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"IBLC_195"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"IBLC_263"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"IBLC_266"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"MCML_360C"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"MCML_360D"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"MCML_360E"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"MCML_360F"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"MCML_360G"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"MCML_360H"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"MCML_360J"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"MCML_360K"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"MCML_360L"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":8,
+              "rooms_name":"MCML_360M"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":10,
+              "rooms_name":"IBLC_265"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":10,
+              "rooms_name":"WOOD_G53"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":10,
+              "rooms_name":"WOOD_G55"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":10,
+              "rooms_name":"WOOD_G59"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":12,
+              "rooms_name":"IBLC_264"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":12,
+              "rooms_name":"SOWK_122"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":12,
+              "rooms_name":"SPPH_B136"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":12,
+              "rooms_name":"WOOD_G57"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":12,
+              "rooms_name":"WOOD_G65"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":14,
+              "rooms_name":"PHRM_3116"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":14,
+              "rooms_name":"SPPH_B138"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":14,
+              "rooms_name":"WOOD_G44"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":16,
+              "rooms_name":"BIOL_1503"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":16,
+              "rooms_name":"BIOL_2519"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":16,
+              "rooms_name":"ANGU_232"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":16,
+              "rooms_name":"ANGU_332"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":16,
+              "rooms_name":"IBLC_460"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":16,
+              "rooms_name":"SOWK_324"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":16,
+              "rooms_name":"SOWK_326"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":16,
+              "rooms_name":"SPPH_B112"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":16,
+              "rooms_name":"WOOD_G66"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":18,
+              "rooms_name":"BUCH_B312"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":18,
+              "rooms_name":"FSC_1402"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":20,
+              "rooms_name":"AUDX_142"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":20,
+              "rooms_name":"FSC_1615"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":20,
+              "rooms_name":"FSC_1617"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":20,
+              "rooms_name":"LASR_211"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":20,
+              "rooms_name":"LASR_5C"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":20,
+              "rooms_name":"ANGU_339"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":20,
+              "rooms_name":"SCRF_1021"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":20,
+              "rooms_name":"SCRF_1022"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":20,
+              "rooms_name":"SCRF_1023"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":20,
+              "rooms_name":"SCRF_1024"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":21,
+              "rooms_name":"AUDX_157"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":21,
+              "rooms_name":"GEOG_242"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":22,
+              "rooms_name":"BUCH_B216"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":22,
+              "rooms_name":"BUCH_B316"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":22,
+              "rooms_name":"BUCH_D209"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":22,
+              "rooms_name":"BUCH_D214"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":22,
+              "rooms_name":"BUCH_D306"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":22,
+              "rooms_name":"BUCH_D315"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":22,
+              "rooms_name":"BUCH_D319"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":22,
+              "rooms_name":"BUCH_D325"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":22,
+              "rooms_name":"CEME_1210"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"BUCH_B319"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"BUCH_D216"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"BUCH_D228"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"FSC_1002"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"FSC_1611"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"IBLC_156"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"IBLC_157"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"IBLC_158"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"IBLC_191"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"MCML_358"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"SCRF_1020"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"SCRF_204A"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"SCRF_210"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"PCOH_1009"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"PCOH_1011"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"PCOH_1215"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":24,
+              "rooms_name":"PCOH_1302"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":26,
+              "rooms_name":"ANSO_202"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":26,
+              "rooms_name":"CEME_1206"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":27,
+              "rooms_name":"SWNG_106"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":27,
+              "rooms_name":"SWNG_108"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":27,
+              "rooms_name":"SWNG_110"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":27,
+              "rooms_name":"SWNG_306"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":27,
+              "rooms_name":"SWNG_308"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":27,
+              "rooms_name":"SWNG_310"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":27,
+              "rooms_name":"SWNG_406"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":27,
+              "rooms_name":"SWNG_408"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":27,
+              "rooms_name":"SWNG_410"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":28,
+              "rooms_name":"FNH_30"
+           },
+           {
+              "rooms_furniture":"Classroom-Fixed Tables/Movable Chairs",
+              "maxSeats":28,
+              "rooms_name":"SPPH_143"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":30,
+              "rooms_name":"BUCH_D205"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":30,
+              "rooms_name":"BUCH_D207"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":30,
+              "rooms_name":"BUCH_D221"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":30,
+              "rooms_name":"BUCH_D229"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":30,
+              "rooms_name":"HENN_301"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":30,
+              "rooms_name":"HENN_302"
+           },
+           {
+              "rooms_furniture":"Classroom-Fixed Tables/Movable Chairs",
+              "maxSeats":30,
+              "rooms_name":"SPPH_B108"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":30,
+              "rooms_name":"UCLL_101"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":30,
+              "rooms_name":"WOOD_B75"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":30,
+              "rooms_name":"WOOD_G41"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":31,
+              "rooms_name":"BUCH_D323"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":32,
+              "rooms_name":"MCML_256"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":32,
+              "rooms_name":"MCML_260"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":33,
+              "rooms_name":"ANSO_203"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":34,
+              "rooms_name":"SCRF_205"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":35,
+              "rooms_name":"FORW_519"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":35,
+              "rooms_name":"ANGU_292"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":36,
+              "rooms_name":"FSC_1613"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":36,
+              "rooms_name":"HENN_304"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":37,
+              "rooms_name":"ANSO_205"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":38,
+              "rooms_name":"SCRF_1328"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":39,
+              "rooms_name":"GEOG_214"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"DMP_101"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"DMP_201"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"IBLC_185"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"MCLD_220"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"SCRF_1003"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"SCRF_1004"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"SCRF_1005"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"SCRF_200"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"SCRF_201"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"SCRF_202"
+           },
+           {
+              "rooms_furniture":"Classroom-Moveable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"SCRF_203"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"SCRF_204"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"SCRF_206"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"SCRF_207"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"SCRF_208"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":40,
+              "rooms_name":"OSBO_203A"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":44,
+              "rooms_name":"FORW_317"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":60,
+              "rooms_name":"MATH_102"
+           },
+           {
+              "rooms_furniture":"Classroom-Movable Tables & Chairs",
+              "maxSeats":60,
+              "rooms_name":"SCRF_209"
+           }
+        ]
+    }
