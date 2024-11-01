@@ -1,0 +1,17 @@
+{
+    "title": "Invalid sort",
+    "input": {
+      "WHERE": {},
+      "OPTIONS": {
+        "COLUMNS": ["courses_dept", "courses_avg"],
+        "ORDER": {
+          "dir": "UP",
+          "keys": ["courses_pass"]
+        }
+      }
+    }
+    ,
+    "errorExpected": true,
+    "expected": "InsightError"
+  }
+  

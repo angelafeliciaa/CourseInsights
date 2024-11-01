@@ -458,5 +458,7 @@ describe("InsightFacade", function () {
 
 		it("[invalid/c2/invalidReferenceMultipleDataset.json] Invalid RMD", checkQuery);
 		it("[invalid/c2/invalidDuplicateApply.json] Invalid duplicate apply", checkQuery);
+		it("[invalid/c2/invalidSortNoColumns.json] Invalid sort", checkQuery);
+
 	});
 });
