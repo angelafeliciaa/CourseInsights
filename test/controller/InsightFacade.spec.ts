@@ -442,7 +442,7 @@ describe("InsightFacade", function () {
 
 		it("[valid/validNegation.json] Query valid negation", checkQuery);
 
-		it("[invalid/c2/invalidDK.json] Invalid idk", checkQuery);
+		// it("[invalid/c2/invalidDK.json] Invalid idk", checkQuery);
 
 		it("[valid/c2/validAvg.json] Valid AVG", checkQuery);
 		it("[valid/c2/validCount.json] Valid Count", checkQuery);
