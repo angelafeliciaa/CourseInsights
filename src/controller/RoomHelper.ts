@@ -70,7 +70,6 @@ function processBuildingTable(table: any): { fullname: string; shortname: string
 			? childNode.childNodes
 					.filter((element: any) => element.nodeName === "tr")
 					.map((element: any) => ({
-						fullname: nodeSearch("views-field views-field-title", element).trim(),
 						shortname: nodeSearch("views-field views-field-field-building-code", element)
 							.trim()
 							.replace(/\s+/g, "")
@@ -83,8 +82,9 @@ function processBuildingTable(table: any): { fullname: string; shortname: string
 
 function processRoomTable(
 	validTable: any,
-	building: { fullname: string; shortname: string; address: string },
-	geolocations: Map<string, GeoResponse>
+	building: { shortname: string; address: string },
+	geolocations: Map<string, GeoResponse>,
+	fullname: string
 ): Room[] {
 	try {
 		return validTable.childNodes.flatMap((node: any) =>
@@ -93,7 +93,7 @@ function processRoomTable(
 						.filter((child: any) => child.nodeName === "tr")
 						.map((child: any) => {
 							const room = new Room();
-							room.fullname = building.fullname;
+							room.fullname = fullname;
 							room.shortname = building.shortname;
 							room.address = building.address as string;
 							const geo = geolocations.get(building.shortname) as GeoResponse;
@@ -193,7 +193,8 @@ export async function parseRooms(content: any): Promise<Room[]> {
 			if (!validTable) {
 				return [];
 			}
-			return processRoomTable(validTable, building, geolocations);
+			const fullname = nodeSearch("building-info", html).trim();
+			return processRoomTable(validTable, building, geolocations, fullname);
 		});
 		return roomsData;
 	} catch (e) {
