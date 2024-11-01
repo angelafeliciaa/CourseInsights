@@ -32,12 +32,15 @@ export default class PerformQuery {
 		// Get the dataset data
 		const datasetData = this.datasets.get(datasetId);
 		// console.log(datasetData);
+
 		if (!datasetData) {
 			throw new InsightError(`Dataset data for ${datasetId} not found.`);
 		}
 
 		// Apply the WHERE clause to filter the data
 		const filteredData = queryHelper.applyWhereClause(datasetData, queryObj.WHERE, datasetId);
+
+		// console.log(filteredData);
 
 		let results: InsightResult[];
 
@@ -62,6 +65,8 @@ export default class PerformQuery {
 			// Assuming MAX_RESULTS is 5000
 			throw new ResultTooLargeError();
 		}
+
+		// console.log(results);
 
 		return results;
 	}

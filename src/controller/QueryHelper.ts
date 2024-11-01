@@ -211,16 +211,51 @@ export class QueryHelper {
 		return groupMap;
 	}
 
+	// private initializeGroupResult(key: string, groupKeys: string[]): any {
+	// 	const result: any = {};
+	// 	const keyValues = key.split("|");
+
+	// 	for (let i = 0; i < groupKeys.length; i++) {
+	// 		const groupKey = groupKeys[i];
+	// 		result[groupKey] = keyValues[i];
+	// 	}
+
+	// 	return result;
+	// }
+
 	private initializeGroupResult(key: string, groupKeys: string[]): any {
 		const result: any = {};
 		const keyValues = key.split("|");
 
 		for (let i = 0; i < groupKeys.length; i++) {
 			const groupKey = groupKeys[i];
-			result[groupKey] = keyValues[i];
+			const [, fieldStr] = groupKey.split("_");
+			const value = keyValues[i];
+
+			// Preserve the original type based on the field
+			if (this.isNumericField(fieldStr)) {
+				result[groupKey] = Number(value);
+			} else {
+				result[groupKey] = value; // Keep as string
+			}
 		}
 
 		return result;
+	}
+
+	// Helper method to determine if a field should be numeric
+	private isNumericField(fieldStr: string): boolean {
+		const numericFields = new Set([
+			"avg",
+			"pass",
+			"fail",
+			"audit",
+			"year", // Section numeric fields
+			"lat",
+			"lon",
+			"seats", // Room numeric fields
+		]);
+		return numericFields.has(fieldStr);
 	}
 
 	private applyAggregations(
