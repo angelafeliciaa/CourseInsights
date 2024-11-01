@@ -1,0 +1,326 @@
+{
+	"title": "Transformation multiple columns",
+    "input": {
+        "WHERE": {
+          "OR": [
+            {
+              "IS": {
+                "rooms_furniture": "*Tables*"
+              }
+            },
+            {
+              "EQ": {
+                "rooms_seats": 50
+              }
+            }
+          ]
+        },
+        "OPTIONS": {
+          "COLUMNS": [
+            "rooms_fullname",
+            "rooms_shortname",
+            "maxSeats",
+            "totalSeats",
+            "roomTypes"
+          ],
+          "ORDER": {
+            "dir": "UP",
+            "keys": [
+              "roomTypes"
+            ]
+          }
+        },
+        "TRANSFORMATIONS": {
+          "GROUP": [
+            "rooms_fullname",
+            "rooms_shortname"
+          ],
+          "APPLY": [
+            {
+              "maxSeats": {
+                "MAX": "rooms_seats"
+              }
+            },
+            {
+              "totalSeats": {
+                "SUM": "rooms_seats"
+              }
+            },
+            {
+              "roomTypes": {
+                "COUNT": "rooms_type"
+              }
+            }
+          ]
+        }
+    },
+    "errorExpected": false,
+    "expected": [
+      {
+         "rooms_fullname":"Anthropology and Sociology",
+         "rooms_shortname":"ANSO",
+         "maxSeats":37,
+         "totalSeats":96,
+         "roomTypes":1
+      },
+      {
+         "rooms_fullname":"Auditorium Annex",
+         "rooms_shortname":"AUDX",
+         "maxSeats":21,
+         "totalSeats":41,
+         "roomTypes":1
+      },
+      {
+         "rooms_fullname":"Earth and Ocean Sciences - Main",
+         "rooms_shortname":"EOSM",
+         "maxSeats":50,
+         "totalSeats":50,
+         "roomTypes":1
+      },
+      {
+         "rooms_fullname":"Earth Sciences Building",
+         "rooms_shortname":"ESB",
+         "maxSeats":80,
+         "totalSeats":80,
+         "roomTypes":1
+      },
+      {
+         "rooms_fullname":"Food, Nutrition and Health",
+         "rooms_shortname":"FNH",
+         "maxSeats":28,
+         "totalSeats":28,
+         "roomTypes":1
+      },
+      {
+         "rooms_fullname":"Friedman Building",
+         "rooms_shortname":"FRDM",
+         "maxSeats":160,
+         "totalSeats":160,
+         "roomTypes":1
+      },
+      {
+         "rooms_fullname":"Hennings",
+         "rooms_shortname":"HENN",
+         "maxSeats":36,
+         "totalSeats":96,
+         "roomTypes":1
+      },
+      {
+         "rooms_fullname":"Jack Bell Building for the School of Social Work",
+         "rooms_shortname":"SOWK",
+         "maxSeats":16,
+         "totalSeats":44,
+         "roomTypes":1
+      },
+      {
+         "rooms_fullname":"Life Sciences Centre",
+         "rooms_shortname":"LSC",
+         "maxSeats":350,
+         "totalSeats":825,
+         "roomTypes":1
+      },
+      {
+         "rooms_fullname":"Neville Scarfe",
+         "rooms_shortname":"SCRF",
+         "maxSeats":60,
+         "totalSeats":724,
+         "roomTypes":1
+      },
+      {
+         "rooms_fullname":"Student Recreation Centre",
+         "rooms_shortname":"SRC",
+         "maxSeats":299,
+         "totalSeats":897,
+         "roomTypes":1
+      },
+      {
+         "rooms_fullname":"Allard Hall (LAW)",
+         "rooms_shortname":"ALRD",
+         "maxSeats":94,
+         "totalSeats":228,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Biological Sciences",
+         "rooms_shortname":"BIOL",
+         "maxSeats":76,
+         "totalSeats":108,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Brock Hall Annex",
+         "rooms_shortname":"BRKX",
+         "maxSeats":70,
+         "totalSeats":94,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Chemical and Biological Engineering Building",
+         "rooms_shortname":"CHBE",
+         "maxSeats":200,
+         "totalSeats":354,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Forest Sciences Centre",
+         "rooms_shortname":"FSC",
+         "maxSeats":65,
+         "totalSeats":272,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Frank Forward",
+         "rooms_shortname":"FORW",
+         "maxSeats":63,
+         "totalSeats":142,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Frederic Lasserre",
+         "rooms_shortname":"LASR",
+         "maxSeats":80,
+         "totalSeats":120,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Geography",
+         "rooms_shortname":"GEOG",
+         "maxSeats":100,
+         "totalSeats":394,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Hebb",
+         "rooms_shortname":"HEBB",
+         "maxSeats":375,
+         "totalSeats":537,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Hugh Dempster Pavilion",
+         "rooms_shortname":"DMP",
+         "maxSeats":160,
+         "totalSeats":440,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Iona Building",
+         "rooms_shortname":"IONA",
+         "maxSeats":100,
+         "totalSeats":150,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Leonard S. Klinck (also known as CSCI)",
+         "rooms_shortname":"LSK",
+         "maxSeats":205,
+         "totalSeats":505,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Mathematics",
+         "rooms_shortname":"MATH",
+         "maxSeats":60,
+         "totalSeats":156,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Orchard Commons",
+         "rooms_shortname":"ORCH",
+         "maxSeats":72,
+         "totalSeats":263,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Ponderosa Commons: Oak House",
+         "rooms_shortname":"PCOH",
+         "maxSeats":40,
+         "totalSeats":216,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Robert F. Osborne Centre",
+         "rooms_shortname":"OSBO",
+         "maxSeats":442,
+         "totalSeats":482,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"School of Population and Public Health",
+         "rooms_shortname":"SPPH",
+         "maxSeats":66,
+         "totalSeats":166,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"The Leon and Thea Koerner University Centre",
+         "rooms_shortname":"UCLL",
+         "maxSeats":55,
+         "totalSeats":133,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Woodward (Instructional Resources Centre-IRC)",
+         "rooms_shortname":"WOOD",
+         "maxSeats":120,
+         "totalSeats":592,
+         "roomTypes":2
+      },
+      {
+         "rooms_fullname":"Civil and Mechanical Engineering",
+         "rooms_shortname":"CEME",
+         "maxSeats":100,
+         "totalSeats":289,
+         "roomTypes":3
+      },
+      {
+         "rooms_fullname":"MacLeod",
+         "rooms_shortname":"MCLD",
+         "maxSeats":136,
+         "totalSeats":503,
+         "roomTypes":3
+      },
+      {
+         "rooms_fullname":"MacMillan",
+         "rooms_shortname":"MCML",
+         "maxSeats":72,
+         "totalSeats":299,
+         "roomTypes":3
+      },
+      {
+         "rooms_fullname":"Pharmaceutical Sciences Building",
+         "rooms_shortname":"PHRM",
+         "maxSeats":236,
+         "totalSeats":538,
+         "roomTypes":3
+      },
+      {
+         "rooms_fullname":"West Mall Swing Space",
+         "rooms_shortname":"SWNG",
+         "maxSeats":190,
+         "totalSeats":1421,
+         "roomTypes":3
+      },
+      {
+         "rooms_fullname":"Buchanan",
+         "rooms_shortname":"BUCH",
+         "maxSeats":108,
+         "totalSeats":1623,
+         "roomTypes":4
+      },
+      {
+         "rooms_fullname":"Irving K Barber Learning Centre",
+         "rooms_shortname":"IBLC",
+         "maxSeats":154,
+         "totalSeats":538,
+         "roomTypes":4
+      },
+      {
+         "rooms_fullname":"Henry Angus",
+         "rooms_shortname":"ANGU",
+         "maxSeats":260,
+         "totalSeats":1546,
+         "roomTypes":5
+      }
+   ]
+}
