@@ -468,6 +468,7 @@ describe("InsightFacade", function () {
 
 		it("[invalid/c2/invalidApplyUnderscore.json] Invalid APPLY underscore", checkQuery);
 		it("[invalid/c2/invalidSum.json] Invalid sum", checkQuery);
+		it("[invalid/c2/invalidUnknownDataset.json] Invalid unknown dataset", checkQuery);
 
 	});
 });
