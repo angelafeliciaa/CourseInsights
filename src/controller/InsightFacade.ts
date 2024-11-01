@@ -169,10 +169,15 @@ export default class InsightFacade implements IInsightFacade {
 			const jsonString = JSON.stringify(jsonArray);
 			await this.saveDataToDisk(jsonString);
 			this.existingDatasetIds.push(id);
+	
+			// Update the datasets map with the new room dataset
+			this.datasets.set(id, listOfRooms);
+	
 			return Array.from(this.existingDatasetIds);
 		}
 		return Promise.reject(new InsightError("Less than 0 valid rooms"));
 	}
+	
 
 	private async createInsightData(id: string, kind: string, numRows: number): Promise<InsightDataset> {
 		if (kind === "section") {
