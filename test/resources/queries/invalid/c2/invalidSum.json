@@ -1,0 +1,19 @@
+{
+    "title": "Invalid sum",
+    "input": {
+      "WHERE": {},
+      "OPTIONS": {
+        "COLUMNS": ["courses_dept", "sumTitle"],
+        "ORDER": "sumTitle"
+      },
+      "TRANSFORMATIONS": {
+        "GROUP": ["courses_dept"],
+        "APPLY": [
+          { "sumTitle": { "SUM": "courses_title" } }
+        ]
+      }
+    },
+    "errorExpected": true,
+    "expected": "InsightError"
+  }
+  

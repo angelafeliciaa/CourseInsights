@@ -20,7 +20,7 @@ export class AggregationHelper {
 		}
 		const avg = total.toNumber() / values.length;
 		const decimalPlace = 2;
-		return Number(new Decimal(avg).toFixed(decimalPlace));
+		return Number(avg.toFixed(decimalPlace));
 	}
 
 	/**

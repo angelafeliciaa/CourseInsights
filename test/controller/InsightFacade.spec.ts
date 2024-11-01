@@ -466,7 +466,10 @@ describe("InsightFacade", function () {
 		it("[invalid/c2/invalidReferenceMultipleDataset.json] Invalid RMD", checkQuery);
 		it("[invalid/c2/invalidDuplicateApply.json] Invalid duplicate apply", checkQuery);
 		it("[invalid/c2/invalidSortNoColumns.json] Invalid sort", checkQuery);
+		it("[invalid/c2/invalidSort.json] Invalid sort doesnt exist", checkQuery);
 
 		it("[invalid/c2/invalidApplyUnderscore.json] Invalid APPLY underscore", checkQuery);
+		it("[invalid/c2/invalidSum.json] Invalid sum", checkQuery);
+		it("[invalid/c2/invalidUnknownDataset.json] Invalid unknown dataset", checkQuery);
 	});
 });
