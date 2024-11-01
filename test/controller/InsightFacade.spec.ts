@@ -443,6 +443,11 @@ describe("InsightFacade", function () {
 		it("[invalid/c2/invalidGroupNull.json] Invalid GROUP NULL", checkQuery);
 		it("[invalid/c2/invalidApplyNotArray.json] Invalid APPLY not array", checkQuery);
 		it("[invalid/c2/invalidANDemptyarray.json] Invalid AND Empty array", checkQuery);
+		it("[invalid/c2/invalidGroupKey.json] Invalid COLUMNS Key not in GROUP or APPLY", checkQuery);
+		it("[invalid/c2/invalidNumericField.json] Invalid APPLY with AVG on Non-numeric Field", checkQuery);
+		it("[invalid/c2/invalidMaxNumeric.json] Invalid APPLY with MAX on Non-numeric Field", checkQuery);
+		it("[invalid/c2/invalidFieldColumns.json] Invalid Field in COLUMNS for Room", checkQuery);
+		it("[invalid/c2/invalidGroupColumns.json] Invalid Field in GROUP for Room Dataset", checkQuery);
 
 		it("[valid/validNegation.json] Query valid negation", checkQuery);
 

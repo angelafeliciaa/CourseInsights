@@ -1,0 +1,28 @@
+{
+    "title": "Invalid Field in COLUMNS for Room",
+    "input": {
+      "WHERE": {
+        "IS": {
+            "sections_title": "algb*"
+          }
+      },
+      "OPTIONS": {
+        "COLUMNS": [
+          "rooms_name",
+          "rooms_invalidField"
+        ]
+      },
+      "TRANSFORMATIONS": {
+        "GROUP": ["rooms_name"],
+        "APPLY": [
+          {
+            "roomCount": {
+              "COUNT": "rooms_name"
+            }
+          }
+        ]
+      }
+    },
+    "errorExpected": true,
+    "expected": "InsightError"
+  }

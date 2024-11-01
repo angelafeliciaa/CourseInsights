@@ -1,0 +1,28 @@
+{
+    "title": "Invalid Field in GROUP for Room Dataset",
+    "input": {
+      "WHERE": {
+        "IS": {
+            "sections_title": "algb*"
+        }
+      },
+      "OPTIONS": {
+        "COLUMNS": [
+          "rooms_name",
+          "roomCount"
+        ]
+      },
+      "TRANSFORMATIONS": {
+        "GROUP": ["rooms_invalidField"],
+        "APPLY": [
+          {
+            "roomCount": {
+              "COUNT": "rooms_name"
+            }
+          }
+        ]
+      }
+    },
+    "errorExpected": true,
+    "expected": "InsightError"
+  }
