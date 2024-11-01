@@ -19,13 +19,15 @@ import { ValidateDataset } from "./SectionsHelper";
  *
  */
 
+export type DataType = Section | Room;
+
 export default class InsightFacade implements IInsightFacade {
 	private existingDatasetIds: string[];
-	private datasets: Map<string, Section[]>;
+	private datasets: Map<string, DataType[]>;
 
 	constructor() {
 		this.existingDatasetIds = [];
-		this.datasets = new Map<string, Section[]>();
+		this.datasets = new Map<string, DataType[]>();
 	}
 
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
@@ -75,9 +77,10 @@ export default class InsightFacade implements IInsightFacade {
 	public readonly MAX_RESULTS = 5000;
 
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
-		// await this.loadDatasetsFromDisk();
+		await this.loadDatasetsFromDisk();
 		const performQuery = new PerformQuery(this.existingDatasetIds, this.datasets);
-		return await performQuery.execute(query); // Call the execute method
+		// console.log(performQuery);
+		return await performQuery.execute(query);
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {
@@ -166,6 +169,10 @@ export default class InsightFacade implements IInsightFacade {
 			const jsonString = JSON.stringify(jsonArray);
 			await this.saveDataToDisk(jsonString);
 			this.existingDatasetIds.push(id);
+
+			// Update the datasets map with the new room dataset
+			this.datasets.set(id, listOfRooms);
+
 			return Array.from(this.existingDatasetIds);
 		}
 		return Promise.reject(new InsightError("Less than 0 valid rooms"));

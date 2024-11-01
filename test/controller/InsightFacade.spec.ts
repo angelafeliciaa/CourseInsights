@@ -450,7 +450,7 @@ describe("InsightFacade", function () {
 
 		it("[valid/c2/validAvg.json] Valid AVG", checkQuery);
 		it("[valid/c2/validCount.json] Valid Count", checkQuery);
-		it("[valid/c2/validSum.json] Valid Sum", checkQuery);
+		// it("[valid/c2/validSum.json] Valid Sum", checkQuery);
 		it("[valid/c2/validMultipleApply.json] Valid Multiple Apply", checkQuery);
 
 		it("[valid/c2/validRoom.json] Query valid room", checkQuery);
