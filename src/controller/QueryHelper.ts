@@ -1,4 +1,5 @@
-// QueryHelper.ts got from llm
+// QueryHelper.ts from llm
+
 import { InsightError, InsightResult } from "./IInsightFacade";
 import { Section } from "./Section";
 import { FilterHelper } from "./QueryFilter";
@@ -38,7 +39,8 @@ export class QueryHelper {
 			throw new InsightError("COLUMNS must be a non-empty array.");
 		}
 
-		// check if from same dataset
+		// Additional validations can be added here if necessary
+
 		return true;
 	}
 
@@ -238,6 +240,15 @@ export class QueryHelper {
 		return results;
 	}
 
+	private processApplyRules(group: DataType[], applyRules: any[], datasetId: string, result: any): void {
+		const isSection = group[0] instanceof Section;
+		const validNumericFields = isSection ? ["avg", "pass", "fail", "audit", "year"] : ["lat", "lon", "seats"];
+
+		for (const applyRule of applyRules) {
+			this.processApplyRule(group, applyRule, datasetId, result, isSection, validNumericFields);
+		}
+	}
+
 	private processApplyRule(
 		group: DataType[],
 		applyRule: any,
@@ -272,37 +283,32 @@ export class QueryHelper {
 		result: any,
 		validNumericFields: string[]
 	): void {
+		// Extract values from the group based on the fieldStr
+		const values = group.map((item) => (item as any)[fieldStr]);
+
 		switch (applyToken) {
 			case "AVG":
 				ValidationHelper.validateNumericField(fieldStr, validNumericFields, applyToken);
-				result[applyKey] = AggregationHelper.calculateAvg(group, fieldStr as any);
+				result[applyKey] = AggregationHelper.calculateAvg(values);
 				break;
 			case "SUM":
 				ValidationHelper.validateNumericField(fieldStr, validNumericFields, applyToken);
-				result[applyKey] = AggregationHelper.calculateSum(group, fieldStr as any);
+				result[applyKey] = AggregationHelper.calculateSum(values);
 				break;
 			case "MIN":
 				ValidationHelper.validateNumericField(fieldStr, validNumericFields, applyToken);
-				result[applyKey] = AggregationHelper.calculateMin(group, fieldStr as any);
+				result[applyKey] = AggregationHelper.calculateMin(values);
 				break;
 			case "MAX":
 				ValidationHelper.validateNumericField(fieldStr, validNumericFields, applyToken);
-				result[applyKey] = AggregationHelper.calculateMax(group, fieldStr as any);
+				result[applyKey] = AggregationHelper.calculateMax(values);
 				break;
 			case "COUNT":
-				result[applyKey] = AggregationHelper.calculateCount(group, fieldStr as any);
+				// For COUNT, values can be any type (number or string)
+				result[applyKey] = AggregationHelper.calculateCount(values);
 				break;
 			default:
 				throw new InsightError("Unsupported APPLY token.");
-		}
-	}
-
-	private processApplyRules(group: DataType[], applyRules: any[], datasetId: string, result: any): void {
-		const isSection = group[0] instanceof Section;
-		const validNumericFields = isSection ? ["avg", "pass", "fail", "audit", "year"] : ["lat", "lon", "seats"];
-
-		for (const applyRule of applyRules) {
-			this.processApplyRule(group, applyRule, datasetId, result, isSection, validNumericFields);
 		}
 	}
 

@@ -455,5 +455,8 @@ describe("InsightFacade", function () {
 
 		it("[valid/c2/validRoom.json] Query valid room", checkQuery);
 		it("[valid/c2/validRoomAll.json] Query valid room all", checkQuery);
+
+		it("[invalid/c2/invalidReferenceMultipleDataset.json] Invalid RMD", checkQuery);
+		it("[invalid/c2/invalidDuplicateApply.json] Invalid duplicate apply", checkQuery);
 	});
 });
