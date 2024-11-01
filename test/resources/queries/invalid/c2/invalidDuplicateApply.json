@@ -1,0 +1,21 @@
+{
+    "title": "Invalid duplicate apply",
+    "input": {
+      "WHERE": {
+        "GT": { "courses_avg": 85 }
+      },
+      "OPTIONS": {
+        "COLUMNS": ["courses_dept", "maxAvg", "minAvg"]
+      },
+      "TRANSFORMATIONS": {
+        "GROUP": ["courses_dept"],
+        "APPLY": [
+          { "maxAvg": { "MAX": "courses_avg" } },
+          { "maxAvg": { "MIN": "courses_avg" } }
+        ]
+      }
+    },
+    "errorExpected": true,
+    "expected": "InsightError"
+  }
+  
