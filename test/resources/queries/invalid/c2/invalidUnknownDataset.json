@@ -1,0 +1,15 @@
+{
+    "title": "Invalid unknown dataset",
+    "input": {
+      "WHERE": {
+        "IS": { "buildings_name": "*Engineering*" }
+      },
+      "OPTIONS": {
+        "COLUMNS": ["buildings_name", "buildings_address"],
+        "ORDER": "buildings_name"
+      }
+    },
+    "errorExpected": true,
+    "expected": "InsightError"
+  }
+  

@@ -1,0 +1,16 @@
+{
+    "title": "Invalid sort doesnt exist",
+    "input": {
+      "WHERE": {},
+      "OPTIONS": {
+        "COLUMNS": ["courses_dept", "courses_avg"],
+        "ORDER": {
+          "dir": "SIDEWAYS",
+          "keys": ["courses_avg"]
+        }
+      }
+    },
+    "errorExpected": true,
+    "expected": "InsightError"
+  }
+  
