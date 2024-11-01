@@ -1,5 +1,3 @@
-// ValidationHelper.ts
-
 import { Section } from "./Section";
 import { Room } from "./Room";
 import { InsightError } from "./IInsightFacade";
