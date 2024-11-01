@@ -19,13 +19,15 @@ import { ValidateDataset } from "./SectionsHelper";
  *
  */
 
+export type DataType = Section | Room;
+
 export default class InsightFacade implements IInsightFacade {
 	private existingDatasetIds: string[];
-	private datasets: Map<string, Section[]>;
+	private datasets: Map<string, DataType[]>;
 
 	constructor() {
 		this.existingDatasetIds = [];
-		this.datasets = new Map<string, Section[]>();
+		this.datasets = new Map<string, DataType[]>();
 	}
 
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
@@ -76,9 +78,10 @@ export default class InsightFacade implements IInsightFacade {
 	public readonly MAX_RESULTS = 5000;
 
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
-		// await this.loadDatasetsFromDisk();
+		await this.loadDatasetsFromDisk();
 		const performQuery = new PerformQuery(this.existingDatasetIds, this.datasets);
-		return await performQuery.execute(query); // Call the execute method
+		// console.log(performQuery);
+		return await performQuery.execute(query);
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {

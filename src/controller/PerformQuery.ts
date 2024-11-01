@@ -22,6 +22,8 @@ export default class PerformQuery {
 		// Get the dataset id from the query
 		const datasetId = queryHelper.getDatasetIdFromQuery(queryObj);
 
+		// console.log(datasetId);
+
 		// Check that the dataset has been added
 		if (!this.existingDatasetIds.includes(datasetId)) {
 			throw new InsightError(`Dataset ${datasetId} not found.`);
@@ -29,12 +31,15 @@ export default class PerformQuery {
 
 		// Get the dataset data
 		const datasetData = this.datasets.get(datasetId);
+		// console.log(datasetData);
 		if (!datasetData) {
 			throw new InsightError(`Dataset data for ${datasetId} not found.`);
 		}
 
 		// Apply the WHERE clause to filter the data
 		const filteredData = queryHelper.applyWhereClause(datasetData, queryObj.WHERE, datasetId);
+
+		// console.log(filteredData);
 
 		let results: InsightResult[];
 

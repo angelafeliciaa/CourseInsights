@@ -1,15 +1,23 @@
 // FilterHelper.ts
-
 import { InsightError } from "./IInsightFacade";
 import { Section } from "./Section";
+import { Room } from "./Room";
 
-type NumericSectionField = "avg" | "pass" | "fail" | "audit" | "year";
-type StringSectionField = "dept" | "id" | "instructor" | "title" | "uuid";
+// type NumericSectionField = "avg" | "pass" | "fail" | "audit" | "year";
+// type StringSectionField = "dept" | "id" | "instructor" | "title" | "uuid";
+
+export type DataType = Section | Room;
+
+export type NumericSectionField = "avg" | "pass" | "fail" | "audit" | "year";
+export type StringSectionField = "dept" | "id" | "instructor" | "title" | "uuid";
+
+export type NumericRoomField = "lat" | "lon" | "seats";
+export type StringRoomField = "fullname" | "shortname" | "number" | "name" | "address" | "type" | "furniture" | "href";
 
 export class FilterHelper {
-	public applyWhereClause(data: Section[], where: any, datasetId: string): Section[] {
+	public applyWhereClause(data: DataType[], where: any, datasetId: string): DataType[] {
 		if (Object.keys(where).length === 0) {
-			return data; // Return all data if WHERE is empty
+			return data;
 		}
 
 		const key = Object.keys(where)[0];
@@ -31,18 +39,18 @@ export class FilterHelper {
 		}
 	}
 
-	private applyAnd(data: Section[], conditions: any[], datasetId: string): Section[] {
+	private applyAnd(data: DataType[], conditions: any[], datasetId: string): DataType[] {
 		if (!Array.isArray(conditions) || conditions.length === 0) {
 			throw new InsightError("AND conditions must be a non-empty array.");
 		}
 		return conditions.reduce((result, condition) => this.applyWhereClause(result, condition, datasetId), data);
 	}
 
-	private applyOr(data: Section[], conditions: any[], datasetId: string): Section[] {
+	private applyOr(data: DataType[], conditions: any[], datasetId: string): DataType[] {
 		if (!Array.isArray(conditions) || conditions.length === 0) {
 			throw new InsightError("OR conditions must be a non-empty array.");
 		}
-		const resultSet = new Set<Section>();
+		const resultSet = new Set<DataType>();
 		for (const condition of conditions) {
 			const result = this.applyWhereClause(data, condition, datasetId);
 			result.forEach((item) => resultSet.add(item));
@@ -50,12 +58,12 @@ export class FilterHelper {
 		return Array.from(resultSet);
 	}
 
-	private applyNot(data: Section[], condition: any, datasetId: string): Section[] {
+	private applyNot(data: DataType[], condition: any, datasetId: string): DataType[] {
 		const matching = this.applyWhereClause(data, condition, datasetId);
 		return data.filter((item) => !matching.includes(item));
 	}
 
-	private applyMComparator(data: Section[], comparator: string, mComparator: any, datasetId: string): Section[] {
+	private applyMComparator(data: DataType[], comparator: string, mComparator: any, datasetId: string): DataType[] {
 		const mKey = Object.keys(mComparator)[0];
 		const value = mComparator[mKey];
 		if (typeof value !== "number") {
@@ -67,15 +75,20 @@ export class FilterHelper {
 			throw new InsightError("MComparator key must reference the correct dataset.");
 		}
 
-		const validFields: NumericSectionField[] = ["avg", "pass", "fail", "audit", "year"]; // Use shorthand array syntax
-		if (!validFields.includes(fieldStr as NumericSectionField)) {
-			throw new InsightError("Invalid field in MComparator.");
-		}
+		// const validSectionFields: readonly NumericSectionField[] = ["avg", "pass", "fail", "audit", "year"];
+		// const validRoomFields: readonly NumericRoomField[] = ["lat", "lon", "seats"];
 
-		const field = fieldStr as NumericSectionField;
+		// const isSection = data[0] instanceof Section;
+		// const validFields = isSection ? validSectionFields : validRoomFields;
+
+		// const field = fieldStr as NumericSectionField | NumericRoomField;
+
+		// if (!validFields.includes(fieldStr as any)) {
+		// 	throw new InsightError(`Invalid field in MComparator for ${isSection ? "Section" : "Room"}.`);
+		// }
 
 		return data.filter((item) => {
-			const itemValue = item[field]; // TypeScript now knows itemValue is a number
+			const itemValue = (item as any)[fieldStr];
 			switch (comparator) {
 				case "LT":
 					return itemValue < value;
@@ -89,7 +102,7 @@ export class FilterHelper {
 		});
 	}
 
-	private applySComparator(data: Section[], sComparator: any, datasetId: string): Section[] {
+	private applySComparator(data: DataType[], sComparator: any, datasetId: string): DataType[] {
 		const sKey = Object.keys(sComparator)[0];
 		const value = sComparator[sKey];
 		if (typeof value !== "string") {
@@ -101,18 +114,30 @@ export class FilterHelper {
 			throw new InsightError("SComparator key must reference the correct dataset.");
 		}
 
-		const validFields: StringSectionField[] = ["dept", "id", "instructor", "title", "uuid"];
-		if (!validFields.includes(fieldStr as StringSectionField)) {
-			throw new InsightError("Invalid field in SComparator.");
-		}
+		// const validSectionFields: readonly StringSectionField[] = ["dept", "id", "instructor", "title", "uuid"];
+		// const validRoomFields: readonly StringRoomField[] = [
+		// 	"fullname",
+		// 	"shortname",
+		// 	"number",
+		// 	"name",
+		// 	"address",
+		// 	"type",
+		// 	"furniture",
+		// 	"href",
+		// ];
+
+		// const isSection = data[0] instanceof Section;
+		// const validFields = isSection ? validSectionFields : validRoomFields;
+
+		// if (!validFields.includes(fieldStr as any)) {
+		// 	throw new InsightError(`Invalid field in SComparator for ${isSection ? "Section" : "Room"}.`);
+		// }
 
 		if (this.isInvalidPattern(value)) {
 			throw new InsightError("Invalid wildcard usage in IS.");
 		}
 
-		const field = fieldStr as StringSectionField;
-
-		return data.filter((item) => this.matches(item[field], value));
+		return data.filter((item) => this.matches((item as any)[fieldStr], value));
 	}
 
 	private matches(itemValue: string, pattern: string): boolean {
