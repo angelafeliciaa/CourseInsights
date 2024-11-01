@@ -148,7 +148,7 @@ export class QueryHelper {
 			// Construct a key using the full group keys
 			const key = groupKeys
 				.map((groupKey) => {
-					const [datasetId, fieldStr] = groupKey.split("_");
+					const [, fieldStr] = groupKey.split("_");
 
 					// Validate that the field exists in the item
 					if (!(fieldStr in item)) {
