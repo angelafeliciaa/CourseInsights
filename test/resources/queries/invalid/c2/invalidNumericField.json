@@ -1,0 +1,28 @@
+{
+    "title": "Invalid APPLY with AVG on Non-numeric Field",
+    "input": {
+      "WHERE": {
+        "IS": {
+          "sections_title": "algb*"
+        }
+      },
+      "OPTIONS": {
+        "COLUMNS": [
+          "sections_title",
+          "averageInstructor"
+        ]
+      },
+      "TRANSFORMATIONS": {
+        "GROUP": ["sections_title"],
+        "APPLY": [
+          {
+            "averageInstructor": {
+              "AVG": "sections_instructor"
+            }
+          }
+        ]
+      }
+    },
+    "errorExpected": true,
+    "expected": "InsightError"
+  }
