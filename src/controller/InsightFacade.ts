@@ -159,7 +159,7 @@ export default class InsightFacade implements IInsightFacade {
 		const listOfRooms: Room[] = await parseRooms(content);
 		if (listOfRooms.length !== 0) {
 			if (this.existingDatasetIds.length !== 0) {
-				const json = await this.loadDataFromDisk("./data/data.json");
+				const json = await this.loadDataFromDisk("./data/section.json");
 				jsonArray = JSON.parse(json);
 			}
 			jsonArray.push([id, "room", listOfRooms]);
