@@ -33,7 +33,7 @@ async function getGeoLocation(address: string): Promise<GeoResponse> {
 }
 
 export async function getGeoLocations(
-	buildings: { fullname: string; shortname: string; address: string }[]
+	buildings: { shortname: string; address: string }[]
 ): Promise<Map<string, GeoResponse>> {
 	const allGeo = await Promise.all(buildings.map(async (b) => getGeoLocation(b.address)));
 	const allGeoBuildings = new Map<string, GeoResponse>();
