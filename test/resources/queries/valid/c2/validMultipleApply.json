@@ -32,8 +32,8 @@
     }
   },
 	"errorExpected": false,
-	"expected": {"result": [
+	"expected": [
     {"sections_title":"algbr & cod thry","max":72.26,"min":63.62},
     {"sections_title":"algb topology i","max":99.78,"min":86},
-    {"sections_title":"algb geometry i","max":97.48,"min":88.75}]}
+    {"sections_title":"algb geometry i","max":97.48,"min":88.75}]
 }

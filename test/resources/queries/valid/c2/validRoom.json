@@ -41,11 +41,9 @@
 		}
 	  },
 	"errorExpected": false,
-	"expected": {
-		"result": [
+	"expected": [
 			{"rooms_shortname":"OSBO","maxSeats":442},
 			{"rooms_shortname":"HEBB","maxSeats":375},
 			{"rooms_shortname":"LSC","maxSeats":350}
 		]
-	}
 }

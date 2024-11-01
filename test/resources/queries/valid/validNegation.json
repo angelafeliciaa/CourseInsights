@@ -4,7 +4,7 @@
 		"WHERE": {
 			"NOT": {
 				"LT": {
-					"sections_avg": 97
+					"sections_avg": 99
 				}
 			}
 		},
@@ -17,5 +17,8 @@
 		}
 	},
 	"errorExpected": false,
-	"expected": "InsightError"
+	"expected": [
+		{"sections_avg":99.19,"sections_dept":"cnps"},
+		{"sections_avg":99.78,"sections_dept":"math"},
+		{"sections_avg":99.78,"sections_dept":"math"}]
 }

@@ -25,11 +25,10 @@
         }
       },
 	"errorExpected": false,
-	"expected": {
-    "result":[
+	"expected": [
       {"count":6},
       {"count":36},
       {"count":17},
       {"count":3},
-      {"count":2}]}
+      {"count":2}]
 }
