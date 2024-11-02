@@ -18,6 +18,8 @@
 		"OPTIONS": {
 		  "COLUMNS": [
 			"rooms_shortname",
+			"rooms_address",
+			"rooms_href",
 			"maxSeats"
 		  ],
 		  "ORDER": {
@@ -29,7 +31,9 @@
 		},
 		"TRANSFORMATIONS": {
 		  "GROUP": [
-			"rooms_shortname"
+			"rooms_shortname",
+			"rooms_address",
+			"rooms_href"
 		  ],
 		  "APPLY": [
 			{
@@ -42,8 +46,29 @@
 	  },
 	"errorExpected": false,
 	"expected": [
-			{"rooms_shortname":"OSBO","maxSeats":442},
-			{"rooms_shortname":"HEBB","maxSeats":375},
-			{"rooms_shortname":"LSC","maxSeats":350}
-		]
+		   {
+			  "rooms_shortname":"OSBO",
+			  "rooms_address":"6108 Thunderbird Boulevard",
+			  "rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/OSBO-A",
+			  "maxSeats":442
+		   },
+		   {
+			  "rooms_shortname":"HEBB",
+			  "rooms_address":"2045 East Mall",
+			  "rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/HEBB-100",
+			  "maxSeats":375
+		   },
+		   {
+			  "rooms_shortname":"LSC",
+			  "rooms_address":"2350 Health Sciences Mall",
+			  "rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/LSC-1001",
+			  "maxSeats":350
+		   },
+		   {
+			  "rooms_shortname":"LSC",
+			  "rooms_address":"2350 Health Sciences Mall",
+			  "rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/LSC-1002",
+			  "maxSeats":350
+		   }
+	]
 }
