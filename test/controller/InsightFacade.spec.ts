@@ -31,6 +31,7 @@ describe("InsightFacade", function () {
 	let removeResult: string;
 	let removeKey: string;
 	let buildings: string;
+	let invalidBuilding: string;
 
 	before(async function () {
 		// This block runs once and loads the datasets.
@@ -40,6 +41,7 @@ describe("InsightFacade", function () {
 		removeResult = await getContentFromArchives("removeResult.zip");
 		removeKey = await getContentFromArchives("removeKey.zip");
 		buildings = await getContentFromArchives("campus.zip");
+		invalidBuilding = await getContentFromArchives("invalidcampus.zip");
 
 		// Just in case there is anything hanging around from a previous run of the test suite
 		await clearDisk();
@@ -152,6 +154,15 @@ describe("InsightFacade", function () {
 			const result = await facade.addDataset("hello", buildings, InsightDatasetKind.Rooms);
 			// check result correct
 			expect(result).to.have.members(["hello"]);
+		});
+
+		it("should reject invalid room dataset", async function () {
+			try {
+				await facade.addDataset("testinvalidjson", invalidBuilding, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown above.");
+			} catch (err) {
+				return expect(err).to.be.instanceOf(InsightError);
+			}
 		});
 	});
 
@@ -434,6 +445,7 @@ describe("InsightFacade", function () {
 		// test for aggregations
 		it("[invalid/c2/invalidApply.json] Invalid APPLY token", checkQuery);
 		it("[invalid/c2/invalidAvg.json] Invalid AVG", checkQuery);
+		it("[invalid/c2/invalidWhere.json] Invalid WHERE for room", checkQuery);
 
 		it("[invalid/c2/invalidOrderNoDir.json] Invalid ORDER no direction", checkQuery);
 		it("[invalid/c2/invalidOrderNull.json] Invalid ORDER NULL", checkQuery);
@@ -448,6 +460,7 @@ describe("InsightFacade", function () {
 		it("[invalid/c2/invalidMaxNumeric.json] Invalid APPLY with MAX on Non-numeric Field", checkQuery);
 		it("[invalid/c2/invalidFieldColumns.json] Invalid Field in COLUMNS for Room", checkQuery);
 		it("[invalid/c2/invalidGroupColumns.json] Invalid Field in GROUP for Room Dataset", checkQuery);
+		it("[invalid/c2/mismatchColumnName.json] Mismatch Column Name", checkQuery);
 
 		it("[valid/validNegation.json] Query valid negation", checkQuery);
 
@@ -473,5 +486,7 @@ describe("InsightFacade", function () {
 		it("[invalid/c2/invalidApplyUnderscore.json] Invalid APPLY underscore", checkQuery);
 		it("[invalid/c2/invalidSum.json] Invalid sum", checkQuery);
 		it("[invalid/c2/invalidUnknownDataset.json] Invalid unknown dataset", checkQuery);
+
+		it("[invalid/c2/invalidComplex.json] Invalid Rooms key type in Max", checkQuery);
 	});
 });
