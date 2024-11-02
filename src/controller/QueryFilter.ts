@@ -100,42 +100,65 @@ export class FilterHelper {
 	}
 
 	private applySComparator(data: DataType[], sComparator: any, datasetId: string): DataType[] {
+		// Ensure that the data array is not empty to prevent runtime errors
+		if (data.length === 0) {
+			throw new InsightError("Data array is empty. Cannot apply SComparator.");
+		}
+	
 		const sKey = Object.keys(sComparator)[0];
 		const value = sComparator[sKey];
+	
+		// Validate that the comparator value is a string
 		if (typeof value !== "string") {
 			throw new InsightError("SComparator value must be a string.");
 		}
-
+	
+		// Split the key into dataset ID and field string
 		const [id, fieldStr] = sKey.split("_");
+	
+		// Validate that the dataset ID matches the expected dataset
 		if (id !== datasetId) {
 			throw new InsightError("SComparator key must reference the correct dataset.");
 		}
-
-		// const validSectionFields: readonly StringSectionField[] = ["dept", "id", "instructor", "title", "uuid"];
-		// const validRoomFields: readonly StringRoomField[] = [
-		// 	"fullname",
-		// 	"shortname",
-		// 	"number",
-		// 	"name",
-		// 	"address",
-		// 	"type",
-		// 	"furniture",
-		// 	"href",
-		// ];
-
-		// const isSection = data[0] instanceof Section;
-		// const validFields = isSection ? validSectionFields : validRoomFields;
-
-		// if (!validFields.includes(fieldStr as any)) {
-		// 	throw new InsightError(`Invalid field in SComparator for ${isSection ? "Section" : "Room"}.`);
-		// }
-
+	
+		// Define valid fields for different dataset types
+		// Adjust these arrays based on your actual dataset schema
+		const validSectionFields: readonly string[] = ["dept", "id", "instructor", "title", "uuid"];
+		const validRoomFields: readonly string[] = [
+			"fullname",
+			"shortname",
+			"number",
+			"name",
+			"address",
+			"type",
+			"furniture",
+			"href",
+		];
+	
+		// Determine the dataset type based on the dataset ID prefix
+		let validFields: readonly string[];
+		if (datasetId.startsWith("sections")) {
+			validFields = validSectionFields;
+		} else if (datasetId.startsWith("rooms")) {
+			validFields = validRoomFields;
+		} else {
+			throw new InsightError("Unknown dataset ID prefix.");
+		}
+	
+		// Validate that the fieldStr is among the valid fields for the dataset
+		if (!validFields.includes(fieldStr)) {
+			throw new InsightError(`Invalid field "${fieldStr}" in SComparator for dataset "${datasetId}".`);
+		}
+	
+		// Check for invalid wildcard patterns in the comparator value
 		if (this.isInvalidPattern(value)) {
 			throw new InsightError("Invalid wildcard usage in IS.");
 		}
-
+	
+		// Perform the filtering based on the comparator
 		return data.filter((item) => this.matches((item as any)[fieldStr], value));
 	}
+	
 
 	private matches(itemValue: string, pattern: string): boolean {
 		// Handle wildcards at the start and/or end
