@@ -72,18 +72,6 @@ export class FilterHelper {
 			throw new InsightError("MComparator key must reference the correct dataset.");
 		}
 
-		// const validSectionFields: readonly NumericSectionField[] = ["avg", "pass", "fail", "audit", "year"];
-		// const validRoomFields: readonly NumericRoomField[] = ["lat", "lon", "seats"];
-
-		// const isSection = data[0] instanceof Section;
-		// const validFields = isSection ? validSectionFields : validRoomFields;
-
-		// const field = fieldStr as NumericSectionField | NumericRoomField;
-
-		// if (!validFields.includes(fieldStr as any)) {
-		// 	throw new InsightError(`Invalid field in MComparator for ${isSection ? "Section" : "Room"}.`);
-		// }
-
 		return data.filter((item) => {
 			const itemValue = (item as any)[fieldStr];
 			switch (comparator) {
@@ -100,29 +88,36 @@ export class FilterHelper {
 	}
 
 	private applySComparator(data: DataType[], sComparator: any, datasetId: string): DataType[] {
-		// Ensure that the data array is not empty to prevent runtime errors
+		this.validateSComparatorInput(data, sComparator); // Removed datasetId from arguments
+
+		const [id, fieldStr] = Object.keys(sComparator)[0].split("_");
+		const value = sComparator[`${id}_${fieldStr}`];
+
+		const validFields = this.getValidStringFields(datasetId);
+		this.validateFieldStr(fieldStr, validFields, datasetId);
+
+		this.validatePattern(value);
+
+		return data.filter((item) => this.matches((item as any)[fieldStr], value));
+	}
+
+	private validateSComparatorInput(data: DataType[], sComparator: any): void {
+		// Removed datasetId from parameters
 		if (data.length === 0) {
 			throw new InsightError("Data array is empty. Cannot apply SComparator.");
 		}
-	
-		const sKey = Object.keys(sComparator)[0];
-		const value = sComparator[sKey];
-	
-		// Validate that the comparator value is a string
-		if (typeof value !== "string") {
-			throw new InsightError("SComparator value must be a string.");
+
+		if (typeof sComparator !== "object" || Array.isArray(sComparator) || sComparator === null) {
+			throw new InsightError("SComparator must be a non-null object.");
 		}
-	
-		// Split the key into dataset ID and field string
-		const [id, fieldStr] = sKey.split("_");
-	
-		// Validate that the dataset ID matches the expected dataset
-		if (id !== datasetId) {
-			throw new InsightError("SComparator key must reference the correct dataset.");
+
+		const keys = Object.keys(sComparator);
+		if (keys.length !== 1) {
+			throw new InsightError("SComparator must have exactly one key.");
 		}
-	
-		// Define valid fields for different dataset types
-		// Adjust these arrays based on your actual dataset schema
+	}
+
+	private getValidStringFields(datasetId: string): readonly string[] {
 		const validSectionFields: readonly string[] = ["dept", "id", "instructor", "title", "uuid"];
 		const validRoomFields: readonly string[] = [
 			"fullname",
@@ -134,31 +129,31 @@ export class FilterHelper {
 			"furniture",
 			"href",
 		];
-	
-		// Determine the dataset type based on the dataset ID prefix
-		let validFields: readonly string[];
+
 		if (datasetId.startsWith("sections")) {
-			validFields = validSectionFields;
+			return validSectionFields;
 		} else if (datasetId.startsWith("rooms")) {
-			validFields = validRoomFields;
+			return validRoomFields;
 		} else {
 			throw new InsightError("Unknown dataset ID prefix.");
 		}
-	
-		// Validate that the fieldStr is among the valid fields for the dataset
+	}
+
+	private validateFieldStr(fieldStr: string, validFields: readonly string[], datasetId: string): void {
 		if (!validFields.includes(fieldStr)) {
 			throw new InsightError(`Invalid field "${fieldStr}" in SComparator for dataset "${datasetId}".`);
 		}
-	
-		// Check for invalid wildcard patterns in the comparator value
+	}
+
+	private validatePattern(value: string): void {
+		if (typeof value !== "string") {
+			throw new InsightError("SComparator value must be a string.");
+		}
+
 		if (this.isInvalidPattern(value)) {
 			throw new InsightError("Invalid wildcard usage in IS.");
 		}
-	
-		// Perform the filtering based on the comparator
-		return data.filter((item) => this.matches((item as any)[fieldStr], value));
 	}
-	
 
 	private matches(itemValue: string, pattern: string): boolean {
 		// Handle wildcards at the start and/or end
