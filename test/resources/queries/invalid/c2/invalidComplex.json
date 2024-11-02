@@ -18,7 +18,7 @@
         "OPTIONS": {
           "COLUMNS": [
             "rooms_dept",
-            "minSeats"
+            "maxSeats"
           ],
           "ORDER": {
             "dir": "DOWN",
@@ -33,8 +33,8 @@
           ],
           "APPLY": [
             {
-              "minSeats": {
-                "MIN": "rooms_seats"
+              "maxSeats": {
+                "MAX": "rooms_seats"
               }
             }
           ]
