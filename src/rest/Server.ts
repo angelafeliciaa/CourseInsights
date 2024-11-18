@@ -113,7 +113,7 @@ export default class Server {
 		this.express.post("/query", this.postQuery);
 	}
 
-	private putDataset = async (req: Request, res: Response) => {
+	private putDataset = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		const kindStr = req.params.kind.toLowerCase(); // Normalize the kind string
 		let kind: InsightDatasetKind;
@@ -142,7 +142,7 @@ export default class Server {
 		}
 	};
 
-	private deleteDataset = async (req: Request, res: Response) => {
+	private deleteDataset = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 
 		try {
@@ -159,7 +159,7 @@ export default class Server {
 		}
 	};
 
-	private getDatasets = async (req: Request, res: Response) => {
+	private getDatasets = async (_: Request, res: Response): Promise<void> => {
 		try {
 			const result = await this.insightFacade.listDatasets();
 			res.status(StatusCodes.OK).json({ result });
@@ -168,7 +168,7 @@ export default class Server {
 		}
 	};
 
-	private postQuery = async (req: Request, res: Response) => {
+	private postQuery = async (req: Request, res: Response): Promise<void> => {
 		const query = req.body;
 
 		try {
