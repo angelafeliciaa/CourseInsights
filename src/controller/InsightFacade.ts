@@ -100,7 +100,7 @@ export default class InsightFacade implements IInsightFacade {
 					this.existingDatasetIds.push(id);
 				}
 			} else if (this.existingDatasetIds.length === 0) {
-				await this.saveDataToDisk([]);
+				await this.saveDataToDisk("");
 			}
 		} catch (e) {
 			return Promise.reject(new InsightError(`loading data failed: ${e}`));

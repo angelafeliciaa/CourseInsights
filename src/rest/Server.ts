@@ -80,7 +80,6 @@ export default class Server {
 
 	// Registers middleware to parse request before passing them to request handlers
 	private registerMiddleware(): void {
-		// JSON parser must be place before raw parser because of wildcard matching done by raw parser below
 		this.express.use(express.json());
 		this.express.use(express.raw({ type: "application/*", limit: "10mb" }));
 
@@ -110,30 +109,74 @@ export default class Server {
 		this.express.get("/datasets", this.getDatasets);
 
 		// POST /query
-		this.express.post("/query", this.postQuery);
+		// this.express.post("/query", this.postQuery);
+		this.express.post("/query", express.json(), this.postQuery);
 	}
+
+	// private putDataset = async (req: Request, res: Response): Promise<void> => {
+	// 	const id = req.params.id;
+	// 	const kindStr = req.params.kind.toLowerCase(); // Normalize the kind string
+	// 	let kind: InsightDatasetKind;
+
+	// 	// Validate and map the kind string to the InsightDatasetKind enum
+	// 	if (kindStr === InsightDatasetKind.Sections) {
+	// 		kind = InsightDatasetKind.Sections;
+	// 	} else if (kindStr === InsightDatasetKind.Rooms) {
+	// 		kind = InsightDatasetKind.Rooms;
+	// 	} else {
+	// 		res.status(StatusCodes.BAD_REQUEST).json({ error: `Invalid dataset kind: ${kindStr}` });
+	// 		return; // Exit early if kind is invalid
+	// 	}
+
+	// 	const content = req.body;
+
+	// 	try {
+	// 		const result = await this.insightFacade.addDataset(id, content, kind);
+	// 		res.status(StatusCodes.OK).json({ result });
+	// 	} catch (error: any) {
+	// 		if (error instanceof InsightError) {
+	// 			res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
+	// 		} else {
+	// 			res.status(StatusCodes.BAD_REQUEST).json({ error: "Unknown Error" });
+	// 		}
+	// 	}
+	// };
 
 	private putDataset = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
-		const kindStr = req.params.kind.toLowerCase(); // Normalize the kind string
+		const kindStr = req.params.kind.toLowerCase();
 		let kind: InsightDatasetKind;
 
-		// Validate and map the kind string to the InsightDatasetKind enum
-		if (kindStr === InsightDatasetKind.Sections) {
-			kind = InsightDatasetKind.Sections;
-		} else if (kindStr === InsightDatasetKind.Rooms) {
-			kind = InsightDatasetKind.Rooms;
-		} else {
-			res.status(StatusCodes.BAD_REQUEST).json({ error: `Invalid dataset kind: ${kindStr}` });
-			return; // Exit early if kind is invalid
-		}
-
-		const content = req.body;
-
 		try {
+			// Log incoming request details for debugging
+			Log.info(`Processing PUT request for dataset ${id} of kind ${kindStr}`);
+			Log.info(`Content-Type: ${req.get("Content-Type")}`);
+			Log.info(`Body is Buffer: ${Buffer.isBuffer(req.body)}`);
+			Log.info(`Body length: ${req.body.length}`);
+
+			// Validate kind
+			if (kindStr === InsightDatasetKind.Sections) {
+				kind = InsightDatasetKind.Sections;
+			} else if (kindStr === InsightDatasetKind.Rooms) {
+				kind = InsightDatasetKind.Rooms;
+			} else {
+				throw new InsightError(`Invalid dataset kind: ${kindStr}`);
+			}
+
+			// Ensure req.body is a Buffer
+			if (!Buffer.isBuffer(req.body)) {
+				throw new InsightError("Expected request body to be a Buffer");
+			}
+
+			// Convert Buffer to base64 string
+			const content = req.body.toString("base64");
+
+			// Call InsightFacade with the base64 content
 			const result = await this.insightFacade.addDataset(id, content, kind);
+
 			res.status(StatusCodes.OK).json({ result });
 		} catch (error: any) {
+			Log.error(`Error in putDataset: ${error.message}`);
 			if (error instanceof InsightError) {
 				res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
 			} else {

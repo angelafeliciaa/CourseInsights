@@ -48,35 +48,100 @@ describe("Facade C3", function () {
 		// might want to add some process logging here to keep track of what is going on
 	});
 
+	// it.only("PUT test for sections dataset", async function () {
+	// 	const datasetId = "cpsc";
+	// 	const kind = "sections";
+	// 	const ENDPOINT_URL = `/dataset/${datasetId}/${kind}`;
+	// 	const zipFilePath = path.join(__dirname, "../resources/archives/cpsc.zip");
+	// 	let ZIP_FILE_DATA: Buffer;
+
+	// 	try {
+	// 		ZIP_FILE_DATA = await fs.readFile(zipFilePath);
+	// 		// console.log(ZIP_FILE_DATA);
+	// 	} catch (err) {
+	// 		Log.error(`Failed to read ZIP file: ${err}`);
+	// 		expect.fail("Failed to read ZIP file");
+	// 	}
+
+	// 	try {
+	// 		console.log("hi");
+	// 		const res = await request(SERVER_URL)
+	// 			.put(ENDPOINT_URL)
+	// 			.send(ZIP_FILE_DATA)
+	// 			.set("Content-Type", "application/x-zip-compressed");
+
+	// 		Log.info(`Response status: ${res.status}`);
+	// 		Log.info(`Response body: ${JSON.stringify(res.body)}`);
+	// 		expect(res.status).to.be.equal(StatusCodes.OK);
+	// 		expect(res.body).to.have.property("result");
+	// 		expect(res.body.result).to.be.an("array").that.includes(datasetId);
+	// 	} catch (err) {
+	// 		Log.error(`Error in PUT test: ${err}`);
+	// 		expect.fail("PUT request failed");
+	// 	}
+	// });
+
+	// it("PUT test for courses dataset", function () {
+	// 	const SERVER_URL = "http://localhost:4321";
+	// 	const ENDPOINT_URL = "/dataset/${datasetId}/${kind}";
+	// 	const ZIP_FILE_DATA = "TBD";
+	// 	try {
+	// 		return request(SERVER_URL)
+	// 			.put(ENDPOINT_URL)
+	// 			.send(ZIP_FILE_DATA)
+	// 			.set("Content-Type", "application/x-zip-compressed")
+	// 			.then(function (res: Response) {
+	// 				// some logging here please!
+	// 				expect(res.status).to.be.equal(StatusCodes.OK);
+	// 			})
+	// 			.catch(function () {
+	// 				// some logging here please!
+	// 				expect.fail();
+	// 			});
+	// 	} catch (err) {
+	// 		Log.error(err);
+
 	it("PUT test for sections dataset", async function () {
-		const datasetId = "courses";
+		const datasetId = "pair";
 		const kind = "sections";
 		const ENDPOINT_URL = `/dataset/${datasetId}/${kind}`;
-		const zipFilePath = path.join(__dirname, "../resources/archives/courses.zip");
+		const zipFilePath = path.join(__dirname, "../resources/archives/pair.zip"); // Ensure correct path
+
 		let ZIP_FILE_DATA: Buffer;
 
 		try {
+			// Read the ZIP file as a Buffer (raw binary data)
 			ZIP_FILE_DATA = await fs.readFile(zipFilePath);
+			Log.info(`Read ZIP file of size: ${ZIP_FILE_DATA.length} bytes`);
 		} catch (err) {
 			Log.error(`Failed to read ZIP file: ${err}`);
 			expect.fail("Failed to read ZIP file");
-			return; // Exit early since we can't proceed without the ZIP data
+			return;
 		}
 
 		try {
 			const res = await request(SERVER_URL)
 				.put(ENDPOINT_URL)
-				.send(ZIP_FILE_DATA)
-				.set("Content-Type", "application/x-zip-compressed");
+				.set("Content-Type", "application/x-zip-compressed")
+				.send(ZIP_FILE_DATA) // Send raw Buffer
+				.buffer(true); // Ensure Supertest handles buffer correctly
 
+			// Log response details
 			Log.info(`Response status: ${res.status}`);
 			Log.info(`Response body: ${JSON.stringify(res.body)}`);
-			expect(res.status).to.be.equal(StatusCodes.OK);
+
+			// Assertions
+			expect(res.status).to.equal(StatusCodes.OK);
 			expect(res.body).to.have.property("result");
 			expect(res.body.result).to.be.an("array").that.includes(datasetId);
-		} catch (err) {
-			Log.error(`Error in PUT test: ${err}`);
-			expect.fail("PUT request failed");
+		} catch (err: any) {
+			Log.error("Test error details:");
+			Log.error(`Error message: ${err.message}`);
+			if (err.response) {
+				Log.error(`Response status: ${err.response.status}`);
+				Log.error(`Response body: ${JSON.stringify(err.response.body)}`);
+			}
+			expect.fail(`PUT request failed: ${err.message}`);
 		}
 	});
 
