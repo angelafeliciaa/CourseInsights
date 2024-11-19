@@ -7,7 +7,8 @@ import { Trash2 } from 'lucide-react'
 
 type Dataset = {
   id: string
-  // Add other relevant properties here
+  kind: string
+  numRows: number
 }
 
 export default function RemoveSectionDataset({ datasets = [], onRemove }: { datasets?: Dataset[], onRemove: (id: string) => void }) {
@@ -15,8 +16,7 @@ export default function RemoveSectionDataset({ datasets = [], onRemove }: { data
 
   const handleRemove = async (id: string) => {
     try {
-      // Replace with your actual API endpoint
-      const response = await fetch(`/api/remove-section-dataset/${id}`, {
+      const response = await fetch(`http://localhost:4321/dataset/${id}`, {
         method: 'DELETE',
       })
 

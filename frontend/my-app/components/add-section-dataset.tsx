@@ -9,42 +9,53 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Upload } from 'lucide-react'
 
-export function AddSectionDataset() {
+type Feedback = {
+  type: 'success' | 'error',
+  message: string
+}
+
+type AddSectionDatasetProps = {
+  onAddDataset: () => void
+}
+
+export function AddSectionDataset({ onAddDataset }: AddSectionDatasetProps) {
   const [datasetId, setDatasetId] = useState('')
   const [file, setFile] = useState<File | null>(null)
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error', message: string } | null>(null)
+  const [feedback, setFeedback] = useState<Feedback | null>(null)
 
-  // In your AddSectionDataset component
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  if (!datasetId || !file) {
-    setFeedback({ type: 'error', message: 'Please provide both Dataset ID and ZIP file.' });
-    return;
-  }
-
-  try {
-    const response = await fetch(`http://localhost:4321/dataset/${datasetId}/sections`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/zip' // Ensure this matches the expected content type
-      },
-      body: file // Send the raw file content
-    });
-
-    if (response.ok) {
-      setFeedback({ type: 'success', message: 'Dataset added successfully!' });
-      // Reset form
-      setDatasetId('');
-      setFile(null);
-    } else {
-      const errorData = await response.json();
-      setFeedback({ type: 'error', message: errorData.error || 'Failed to add dataset. Please try again.' });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!datasetId || !file) {
+      setFeedback({ type: 'error', message: 'Please provide both Dataset ID and ZIP file.' })
+      return
     }
-  } catch (error) {
-    setFeedback({ type: 'error', message: 'An error occurred. Please try again.' });
+
+    // Create FormData to send file
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const response = await fetch(`http://localhost:4321/dataset/${datasetId}/sections`, {
+        method: 'PUT',
+        body: file // Sending the raw file as per backend expectation
+      })
+
+      if (response.ok) {
+        setFeedback({ type: 'success', message: 'Dataset added successfully!' })
+        // Reset form
+        setDatasetId('')
+        setFile(null)
+        // Inform parent to refresh datasets
+        onAddDataset()
+      } else {
+        const errorData = await response.json()
+        setFeedback({ type: 'error', message: errorData.error || 'Failed to add dataset. Please try again.' })
+      }
+    } catch (error) {
+      setFeedback({ type: 'error', message: 'An error occurred. Please try again.' })
+    }
   }
-};
 
   return (
     <div className="max-w-md mx-auto p-6 bg-background rounded-lg shadow-md">
