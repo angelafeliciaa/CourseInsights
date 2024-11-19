@@ -118,7 +118,6 @@ describe("Facade C3", function () {
 
 			expect(res.status).to.be.equal(StatusCodes.OK);
 			expect(res.body).to.have.property("result");
-			// expect(res.body.result).to.be.an("array").that.is.not.empty;
 
 			// // Example: Check if specific datasets are present
 			// const datasetIds = res.body.result.map((dataset: any) => dataset.id);
@@ -164,7 +163,7 @@ describe("Facade C3", function () {
 	});
 
 	it("POST test for query", async function () {
-		const datasetId = "pair4";
+		const datasetId = "sections";
 		const kind = "sections";
 		const zipFilePath = path.join(__dirname, "../resources/archives/pair.zip");
 
@@ -181,7 +180,11 @@ describe("Facade C3", function () {
 
 		const ENDPOINT_URL = `/query`;
 		const query = {
-			WHERE: {},
+			WHERE: {
+				GT: {
+					sections_avg: 97,
+				},
+			},
 			OPTIONS: {
 				COLUMNS: ["sections_dept", "sections_avg"],
 				ORDER: "sections_avg",
