@@ -134,24 +134,26 @@ export default class Server {
 				throw new InsightError(`Invalid dataset kind: ${kindStr}`);
 			}
 
-			// Ensure req.body is a Buffer
-			if (!Buffer.isBuffer(req.body)) {
-				throw new InsightError("Expected request body to be a Buffer");
-			}
-
 			// Convert Buffer to base64 string
 			const content = req.body.toString("base64");
 
-			// Call InsightFacade with the base64 content
-			const result = await this.insightFacade.addDataset(id, content, kind);
-
-			res.status(StatusCodes.OK).json({ result });
+			// Add try-catch specifically around the addDataset call
+			try {
+				const result = await this.insightFacade.addDataset(id, content, kind);
+				res.status(StatusCodes.OK).json({ result });
+			} catch (addError: any) {
+				// Log the specific error from addDataset
+				Log.error(`Error from InsightFacade.addDataset: ${addError.message}`);
+				throw new InsightError(addError.message || "Failed to add dataset");
+			}
 		} catch (error: any) {
 			Log.error(`Error in putDataset: ${error.message}`);
 			if (error instanceof InsightError) {
 				res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
 			} else {
-				res.status(StatusCodes.BAD_REQUEST).json({ error: "Unknown Error" });
+				res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+					error: error.message || "Internal Server Error",
+				});
 			}
 		}
 	};
