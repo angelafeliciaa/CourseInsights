@@ -7,6 +7,7 @@ import RemoveSectionDataset from '@/components/remove-section-dataset'
 import ViewSectionDatasets from '@/components/view-section-dataset'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AddSectionDataset } from '@/components/add-section-dataset'
+import InsightsPage from './insights-page'
 
 type Dataset = {
   id: string
@@ -18,6 +19,7 @@ export default function SectionInsightsDashboard() {
   const [datasets, setDatasets] = useState<Dataset[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState('view')
 
   // Fetch datasets from backend
   const fetchDatasets = async () => {
@@ -44,11 +46,16 @@ export default function SectionInsightsDashboard() {
   // Handler to add a new dataset
   const handleAddDataset = () => {
     fetchDatasets()
+    setActiveTab('view')
   }
 
   // Handler to remove a dataset
   const handleRemoveDataset = () => {
     fetchDatasets()
+  }
+
+  const handleAddClick = () => {
+    setActiveTab('add')
   }
 
   return (
@@ -59,26 +66,35 @@ export default function SectionInsightsDashboard() {
       {error && <p className="text-red-500">{error}</p>}
 
       {!loading && !error && (
-        <Tabs defaultValue="view" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList>
             <TabsTrigger value="view">View Datasets</TabsTrigger>
             <TabsTrigger value="add">Add Dataset</TabsTrigger>
-            <TabsTrigger value="remove">Remove Dataset</TabsTrigger>
+            {/* <TabsTrigger value="remove">Remove Dataset</TabsTrigger> */}
+            <TabsTrigger value="insights">Insights</TabsTrigger>
           </TabsList>
           
           <TabsContent value="view">
-            <ViewSectionDatasets datasets={datasets} />
+            <ViewSectionDatasets datasets={datasets} onRemove={handleRemoveDataset} onAddClick={handleAddClick} />
           </TabsContent>
           
           <TabsContent value="add">
             <AddSectionDataset onAddDataset={handleAddDataset} />
           </TabsContent>
           
-          <TabsContent value="remove">
+          {/* <TabsContent value="remove">
             <RemoveSectionDataset datasets={datasets} onRemove={handleRemoveDataset} />
+          </TabsContent> */}
+
+          <TabsContent value="insights">
+            <InsightsPage />
           </TabsContent>
         </Tabs>
       )}
     </div>
   )
 }
+function setActiveTab(arg0: string) {
+    throw new Error('Function not implemented.')
+}
+
