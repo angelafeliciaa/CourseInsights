@@ -113,35 +113,6 @@ export default class Server {
 		this.express.post("/query", express.json(), this.postQuery);
 	}
 
-	// private putDataset = async (req: Request, res: Response): Promise<void> => {
-	// 	const id = req.params.id;
-	// 	const kindStr = req.params.kind.toLowerCase(); // Normalize the kind string
-	// 	let kind: InsightDatasetKind;
-
-	// 	// Validate and map the kind string to the InsightDatasetKind enum
-	// 	if (kindStr === InsightDatasetKind.Sections) {
-	// 		kind = InsightDatasetKind.Sections;
-	// 	} else if (kindStr === InsightDatasetKind.Rooms) {
-	// 		kind = InsightDatasetKind.Rooms;
-	// 	} else {
-	// 		res.status(StatusCodes.BAD_REQUEST).json({ error: `Invalid dataset kind: ${kindStr}` });
-	// 		return; // Exit early if kind is invalid
-	// 	}
-
-	// 	const content = req.body;
-
-	// 	try {
-	// 		const result = await this.insightFacade.addDataset(id, content, kind);
-	// 		res.status(StatusCodes.OK).json({ result });
-	// 	} catch (error: any) {
-	// 		if (error instanceof InsightError) {
-	// 			res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
-	// 		} else {
-	// 			res.status(StatusCodes.BAD_REQUEST).json({ error: "Unknown Error" });
-	// 		}
-	// 	}
-	// };
-
 	private putDataset = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		const kindStr = req.params.kind.toLowerCase();
