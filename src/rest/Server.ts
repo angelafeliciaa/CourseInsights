@@ -3,16 +3,22 @@ import { StatusCodes } from "http-status-codes";
 import Log from "@ubccpsc310/folder-test/build/Log";
 import * as http from "http";
 import cors from "cors";
+import { InsightError, NotFoundError, InsightDatasetKind } from "../controller/IInsightFacade";
+import InsightFacade from "../controller/InsightFacade";
+
+// got from ai
 
 export default class Server {
 	private readonly port: number;
 	private express: Application;
 	private server: http.Server | undefined;
+	private insightFacade: InsightFacade;
 
 	constructor(port: number) {
 		Log.info(`Server::<init>( ${port} )`);
 		this.port = port;
 		this.express = express();
+		this.insightFacade = new InsightFacade();
 
 		this.registerMiddleware();
 		this.registerRoutes();
@@ -74,12 +80,17 @@ export default class Server {
 
 	// Registers middleware to parse request before passing them to request handlers
 	private registerMiddleware(): void {
-		// JSON parser must be place before raw parser because of wildcard matching done by raw parser below
 		this.express.use(express.json());
 		this.express.use(express.raw({ type: "application/*", limit: "10mb" }));
 
 		// enable cors in request headers to allow cross-origin HTTP requests
-		this.express.use(cors());
+		this.express.use(
+			cors({
+				origin: "http://localhost:3000",
+				methods: ["GET", "POST", "PUT", "DELETE"],
+				allowedHeaders: ["Content-Type"],
+			})
+		);
 	}
 
 	// Registers all request handlers to routes
@@ -88,8 +99,99 @@ export default class Server {
 		// http://localhost:4321/echo/hello
 		this.express.get("/echo/:msg", Server.echo);
 
-		// TODO: your other endpoints should go here
+		// PUT /dataset/:id/:kind
+		this.express.put("/dataset/:id/:kind", this.putDataset);
+
+		// DELETE /dataset/:id
+		this.express.delete("/dataset/:id", this.deleteDataset);
+
+		// GET /datasets
+		this.express.get("/datasets", this.getDatasets);
+
+		// POST /query
+		// this.express.post("/query", this.postQuery);
+		this.express.post("/query", express.json(), this.postQuery);
 	}
+
+	private putDataset = async (req: Request, res: Response): Promise<void> => {
+		const id = req.params.id;
+		const kindStr = req.params.kind.toLowerCase();
+		let kind: InsightDatasetKind;
+
+		try {
+			// Log incoming request details for debugging
+			Log.info(`Processing PUT request for dataset ${id} of kind ${kindStr}`);
+			Log.info(`Content-Type: ${req.get("Content-Type")}`);
+			Log.info(`Body is Buffer: ${Buffer.isBuffer(req.body)}`);
+			Log.info(`Body length: ${req.body.length}`);
+
+			// Validate kind
+			if (kindStr === InsightDatasetKind.Sections) {
+				kind = InsightDatasetKind.Sections;
+			} else if (kindStr === InsightDatasetKind.Rooms) {
+				kind = InsightDatasetKind.Rooms;
+			} else {
+				throw new InsightError(`Invalid dataset kind: ${kindStr}`);
+			}
+
+			// Ensure req.body is a Buffer
+			if (!Buffer.isBuffer(req.body)) {
+				throw new InsightError("Expected request body to be a Buffer");
+			}
+
+			// Convert Buffer to base64 string
+			const content = req.body.toString("base64");
+
+			// Call InsightFacade with the base64 content
+			const result = await this.insightFacade.addDataset(id, content, kind);
+
+			res.status(StatusCodes.OK).json({ result });
+		} catch (error: any) {
+			Log.error(`Error in putDataset: ${error.message}`);
+			if (error instanceof InsightError) {
+				res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
+			} else {
+				res.status(StatusCodes.BAD_REQUEST).json({ error: "Unknown Error" });
+			}
+		}
+	};
+
+	private deleteDataset = async (req: Request, res: Response): Promise<void> => {
+		const id = req.params.id;
+
+		try {
+			const result = await this.insightFacade.removeDataset(id);
+			res.status(StatusCodes.OK).json({ result });
+		} catch (error: any) {
+			if (error instanceof InsightError) {
+				res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
+			} else if (error instanceof NotFoundError) {
+				res.status(StatusCodes.NOT_FOUND).json({ error: error.message });
+			} else {
+				res.status(StatusCodes.BAD_REQUEST).json({ error: "Unknown Error" });
+			}
+		}
+	};
+
+	private getDatasets = async (_: Request, res: Response): Promise<void> => {
+		try {
+			const result = await this.insightFacade.listDatasets();
+			res.status(StatusCodes.OK).json({ result });
+		} catch (error: any) {
+			res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
+		}
+	};
+
+	private postQuery = async (req: Request, res: Response): Promise<void> => {
+		const query = req.body;
+
+		try {
+			const result = await this.insightFacade.performQuery(query);
+			res.status(StatusCodes.OK).json({ result });
+		} catch (error: any) {
+			res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
+		}
+	};
 
 	// The next two methods handle the echo service.
 	// These are almost certainly not the best place to put these, but are here for your reference.

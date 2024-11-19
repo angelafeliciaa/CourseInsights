@@ -56,21 +56,17 @@ export default class InsightFacade implements IInsightFacade {
 
 		if (this.existingDatasetIds.includes(id)) {
 			this.existingDatasetIds.splice(this.existingDatasetIds.indexOf(id), 1);
-			const json = await this.loadDataFromDisk("./data/section.json");
-			let newJsons = JSON.parse(json);
-			newJsons = newJsons.filter(([key, _]: [string, string, any[]]) => {
-				return key !== id;
-			});
+			const jsonArray: [string, string, any[]][] = await this.loadDataFromDisk("./data/section.json");
+			const newJsons = jsonArray.filter(([key, _]) => key !== id);
 
-			const jsonFromString = JSON.stringify(newJsons);
-			await this.saveDataToDisk(jsonFromString);
+			await this.saveDataToDisk(newJsons);
 
 			// Remove the dataset from the datasets map
 			this.datasets.delete(id);
 
 			return id;
 		} else {
-			return Promise.reject(new NotFoundError());
+			throw new NotFoundError(`Dataset with id ${id} not found.`);
 		}
 	}
 
@@ -85,8 +81,7 @@ export default class InsightFacade implements IInsightFacade {
 
 	public async listDatasets(): Promise<InsightDataset[]> {
 		const dataset: InsightDataset[] = [];
-		const jsonString = await this.loadDataFromDisk("./data/section.json");
-		const jsonArray: [string, string, any][] = JSON.parse(jsonString);
+		const jsonArray: [string, string, any][] = await this.loadDataFromDisk("./data/section.json");
 		const promises = jsonArray.map(async ([id, kind, value]) => {
 			return this.createInsightData(id, kind, value.length);
 		});
@@ -100,8 +95,7 @@ export default class InsightFacade implements IInsightFacade {
 		try {
 			const fileExists = await fs.pathExists("./data/section.json");
 			if (fileExists && this.existingDatasetIds.length === 0) {
-				const json = await this.loadDataFromDisk("./data/section.json");
-				const jsonArray: [string, any[]][] = JSON.parse(json);
+				const jsonArray: [string, any[]][] = await this.loadDataFromDisk("./data/section.json");
 				for (const [id] of jsonArray) {
 					this.existingDatasetIds.push(id);
 				}
@@ -145,13 +139,11 @@ export default class InsightFacade implements IInsightFacade {
 		const processedDataset = await validator.validDataset(content);
 		if (processedDataset.length !== 0) {
 			if (this.existingDatasetIds.length !== 0) {
-				const json = await this.loadDataFromDisk("./data/section.json");
-				jsonArray = JSON.parse(json);
+				jsonArray = await this.loadDataFromDisk("./data/section.json");
 			}
 		}
 		jsonArray.push([id, "section", processedDataset]);
-		const jsonString = JSON.stringify(jsonArray);
-		await this.saveDataToDisk(jsonString);
+		await this.saveDataToDisk(jsonArray);
 		this.existingDatasetIds.push(id);
 		this.datasets.set(id, processedDataset);
 		return Array.from(this.existingDatasetIds);
@@ -162,12 +154,10 @@ export default class InsightFacade implements IInsightFacade {
 		const listOfRooms: Room[] = await parseRooms(content);
 		if (listOfRooms.length !== 0) {
 			if (this.existingDatasetIds.length !== 0) {
-				const json = await this.loadDataFromDisk("./data/section.json");
-				jsonArray = JSON.parse(json);
+				jsonArray = await this.loadDataFromDisk("./data/section.json");
 			}
 			jsonArray.push([id, "room", listOfRooms]);
-			const jsonString = JSON.stringify(jsonArray);
-			await this.saveDataToDisk(jsonString);
+			await this.saveDataToDisk(jsonArray);
 			this.existingDatasetIds.push(id);
 
 			// Update the datasets map with the new room dataset
@@ -175,7 +165,7 @@ export default class InsightFacade implements IInsightFacade {
 
 			return Array.from(this.existingDatasetIds);
 		}
-		return Promise.reject(new InsightError("Less than 0 valid rooms"));
+		throw new InsightError("Less than 0 valid rooms");
 	}
 
 	private async createInsightData(id: string, kind: string, numRows: number): Promise<InsightDataset> {
