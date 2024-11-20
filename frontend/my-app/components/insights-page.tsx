@@ -1,5 +1,5 @@
 'use client'
-// from ai
+
 import { useState, useEffect } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -8,47 +8,93 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 type Dataset = {
-  id: string
-  courseName: string
-  averageGrade: number
-  year: number
+  sections_dept: string
+  sections_avg: number
 }
 
 export default function InsightsPage({ id, onBack }: { id: string, onBack: () => void }) {
   const [datasets, setDatasets] = useState<Dataset[]>([])
-  const [filteredDatasets, setFilteredDatasets] = useState<Dataset[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
+  const [inputValue, setInputValue] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    // In a real application, you would fetch this data from an API
-    setDatasets([
-      { id: 'dataset1', courseName: 'Math 101', averageGrade: 85, year: 2020 },
-      { id: 'dataset2', courseName: 'Math 101', averageGrade: 87, year: 2021 },
-      { id: 'dataset3', courseName: 'Math 101', averageGrade: 82, year: 2022 },
-      { id: 'dataset4', courseName: 'Physics 201', averageGrade: 78, year: 2020 },
-      { id: 'dataset5', courseName: 'Physics 201', averageGrade: 80, year: 2021 },
-      { id: 'dataset6', courseName: 'Physics 201', averageGrade: 81, year: 2022 },
-    ])
-  }, [])
+  const handleApply = async () => {
+    setError(null)
 
-  const handleSearch = () => {
-    if (!searchTerm.trim()) {
-      setError('Please enter a course name.')
-      setFilteredDatasets([])
+    // Validate input
+    if (inputValue.length !== 7) {
+      setError('Input must be exactly 7 characters long.')
       return
     }
 
-    const filtered = datasets.filter(dataset => 
-      dataset.courseName.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    const letters = inputValue.slice(0, 4)
+    const numbers = inputValue.slice(4)
 
-    if (filtered.length === 0) {
-      setError('No matching courses found.')
-      setFilteredDatasets([])
-    } else {
-      setError(null)
-      setFilteredDatasets(filtered)
+    if (!/^[A-Za-z]{4}$/.test(letters)) {
+      setError('First 4 characters must be letters.')
+      return
+    }
+
+    if (!/^\d{3}$/.test(numbers)) {
+      setError('Last 3 characters must be numbers.')
+      return
+    }
+
+    // Construct query
+    const query = {
+      "WHERE": {
+        "AND": [
+          {
+            "IS": {
+              [`${id}_id`]: numbers
+            }
+          },
+          {
+            "IS": {
+              [`${id}_dept`]: letters.toLowerCase()
+            }
+          }
+        ]
+      },
+      "OPTIONS": {
+        "COLUMNS": [
+          `${id}_dept`,
+          `${id}_avg`
+        ]
+      }
+    }
+
+    try {
+      // Perform POST request
+      const response = await fetch(`http://localhost:4321/query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(query)
+      })
+
+      console.log('Request Query:', query);
+      console.log('Response Status:', response.status);
+
+      const responseText = await response.text();
+      console.log('Response Text:', responseText);
+
+      if (response.ok) {
+        let data;
+        try {
+          const data = JSON.parse(responseText);
+          setDatasets(data.result);
+        } catch (e) {
+          console.error('Failed to parse JSON:', e);
+          setError('Invalid response from server.');
+        }
+        // const data = await response.json();
+        // setDatasets(data.result);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'An error occurred while fetching data.');
+      }
+    } catch (error) {
+      console.error('Fetch error:', error);
+      setError(`Failed to fetch data. ${error}}`);
     }
   }
 
@@ -65,12 +111,12 @@ export default function InsightsPage({ id, onBack }: { id: string, onBack: () =>
         <div className="flex space-x-2">
           <Input
             type="text"
-            placeholder="Enter course name"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Enter 4 letters followed by 3 numbers"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
             className="max-w-sm"
           />
-          <Button onClick={handleSearch}>Apply</Button>
+          <Button onClick={handleApply}>Apply</Button>
         </div>
         
         {error && (
@@ -81,20 +127,20 @@ export default function InsightsPage({ id, onBack }: { id: string, onBack: () =>
         )}
       </div>
 
-      {filteredDatasets.length > 0 && (
+      {datasets.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Average Grades for {filteredDatasets[0].courseName}</CardTitle>
+            <CardTitle>Average Grades for {datasets[0].sections_dept}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={filteredDatasets}>
+              <BarChart data={datasets}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" />
+                <XAxis dataKey="sections_dept" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="averageGrade" fill="#8884d8" name="Average Grade" />
+                <Bar dataKey="sections_avg" fill="#8884d8" name="Average Grade" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

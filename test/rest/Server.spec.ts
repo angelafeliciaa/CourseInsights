@@ -163,9 +163,11 @@ describe("Facade C3", function () {
 	});
 
 	it("POST test for query", async function () {
-		const datasetId = "sections";
+		const datasetId = "pair4";
 		const kind = "sections";
 		const zipFilePath = path.join(__dirname, "../resources/archives/pair.zip");
+		const numbers = '110'
+		const letters = 'cpsc'
 
 		// Add the dataset before performing the query
 		try {
@@ -177,19 +179,53 @@ describe("Facade C3", function () {
 				expect.fail("An unknown error occurred while adding dataset");
 			}
 		}
+		
 
 		const ENDPOINT_URL = `/query`;
+		// const query = {
+		// 	"WHERE": {
+		// 	  "AND": [
+		// 		{
+		// 		  "IS": {
+		// 			[`${datasetId}_id`]: numbers
+		// 		  }
+		// 		},
+		// 		{
+		// 		  "IS": {
+		// 			[`${datasetId}_dept`]: letters.toLowerCase()
+		// 		  }
+		// 		}
+		// 	  ]
+		// 	},
+		// 	"OPTIONS": {
+		// 	  "COLUMNS": [
+		// 		`${datasetId}_dept`,
+		// 		`${datasetId}_avg`
+		// 	  ]
+		// 	}
+		//   };
 		const query = {
-			WHERE: {
-				GT: {
-					sections_avg: 97,
+			"WHERE": {
+			  "AND": [
+				{
+				  "IS": {
+					"pair4_id": numbers
+				  }
 				},
+				{
+				  "IS": {
+					"pair4_dept": letters
+				  }
+				}
+			  ]
 			},
-			OPTIONS: {
-				COLUMNS: ["sections_dept", "sections_avg"],
-				ORDER: "sections_avg",
-			},
-		};
+			"OPTIONS": {
+			  "COLUMNS": [
+				"pair4_dept",
+				"pair4_avg"
+			  ]
+			}
+		  };
 
 		try {
 			const res = await request(SERVER_URL).post(ENDPOINT_URL).send(query).set("Content-Type", "application/json");

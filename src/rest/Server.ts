@@ -109,8 +109,8 @@ export default class Server {
 		this.express.get("/datasets", this.getDatasets);
 
 		// POST /query
-		// this.express.post("/query", this.postQuery);
-		this.express.post("/query", express.json(), this.postQuery);
+		this.express.post("/query", this.postQuery);
+		// this.express.post("/query", express.json(), this.postQuery);
 	}
 
 	private putDataset = async (req: Request, res: Response): Promise<void> => {
@@ -185,6 +185,7 @@ export default class Server {
 	};
 
 	private postQuery = async (req: Request, res: Response): Promise<void> => {
+		// const query = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 		const query = req.body;
 
 		try {
