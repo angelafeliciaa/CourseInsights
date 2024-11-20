@@ -1,26 +1,43 @@
+// ViewSectionDatasets.tsx from ai
+
 'use client'
 
-// got from v0
-import ViewSectionDatasets from '@/components/view-section-dataset'
-import { useState, useEffect } from 'react'
+type Dataset = {
+  id: string
+  kind: string
+  numRows: number
+}
 
-export default function ViewDatasetsPage() {
-  const [datasets, setDatasets] = useState<{ id: string }[]>([])
+type ViewSectionDatasetsProps = {
+  datasets: Dataset[]
+}
 
-  useEffect(() => {
-    // Fetch datasets from API
-    // For now, we'll use dummy data
-    setDatasets([
-      { id: 'dataset1' },
-      { id: 'dataset2' },
-      { id: 'dataset3' },
-    ])
-  }, [])
-
+export default function ViewSectionDatasets({ datasets }: ViewSectionDatasetsProps) {
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">View Section Datasets</h1>
-      <ViewSectionDatasets datasets={datasets} />
+    <div className="max-w-2xl mx-auto p-6 bg-background rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6">Available Section Datasets</h2>
+      {datasets.length === 0 ? (
+        <p>No datasets available.</p>
+      ) : (
+        <table className="min-w-full bg-white">
+          <thead>
+            <tr>
+              <th className="py-2">Dataset ID</th>
+              <th className="py-2">Kind</th>
+              <th className="py-2">Number of Rows</th>
+            </tr>
+          </thead>
+          <tbody>
+            {datasets.map(dataset => (
+              <tr key={dataset.id} className="text-center">
+                <td className="py-2">{dataset.id}</td>
+                <td className="py-2">{dataset.kind}</td>
+                <td className="py-2">{dataset.numRows}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   )
 }

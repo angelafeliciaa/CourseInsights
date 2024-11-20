@@ -1,62 +1,100 @@
 'use client'
 
+// from ai
+
 import { useState, useEffect } from 'react'
-import RemoveSectionDataset from './remove-section-dataset'
-// import ViewSectionDatasets from './view-section-datasets'
+import RemoveSectionDataset from '@/components/remove-section-dataset'
+import ViewSectionDatasets from '@/components/view-section-dataset'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import ViewSectionDatasets from './view-section-dataset'
-import { AddSectionDataset } from './add-section-dataset'
+import { AddSectionDataset } from '@/components/add-section-dataset'
+import InsightsPage from './insights-page'
 
 type Dataset = {
   id: string
-  dateAdded: string
-  size: string
+  kind: string
+  numRows: number
 }
 
 export default function SectionInsightsDashboard() {
   const [datasets, setDatasets] = useState<Dataset[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState('view')
 
-  useEffect(() => {
-    // In a real application, you would fetch this data from an API
-    setDatasets([
-      { id: 'dataset1', dateAdded: '2023-05-15', size: '1.2 GB' },
-      { id: 'dataset2', dateAdded: '2023-05-16', size: '800 MB' },
-      { id: 'dataset3', dateAdded: '2023-05-17', size: '2.5 GB' },
-    ])
-  }, [])
-
-  const handleAddDataset = (newDataset: Dataset) => {
-    setDatasets([...datasets, newDataset])
+  // Fetch datasets from backend
+  const fetchDatasets = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch('http://localhost:4321/datasets')
+      if (!response.ok) {
+        throw new Error(`Error fetching datasets: ${response.statusText}`)
+      }
+      const data = await response.json()
+      setDatasets(data.result)
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch datasets.')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleRemoveDataset = (id: string) => {
-    setDatasets(datasets.filter(dataset => dataset.id !== id))
+  useEffect(() => {
+    fetchDatasets()
+  }, [])
+
+  // Handler to add a new dataset
+  const handleAddDataset = () => {
+    fetchDatasets()
+    setActiveTab('view')
+  }
+
+  // Handler to remove a dataset
+  const handleRemoveDataset = () => {
+    fetchDatasets()
+  }
+
+  const handleAddClick = () => {
+    setActiveTab('add')
   }
 
   return (
     <div className="container mx-auto py-8 space-y-8">
       <h1 className="text-3xl font-bold mb-8">Section Insights Dashboard</h1>
       
-      <Tabs defaultValue="view" className="w-full">
-        <TabsList>
-          <TabsTrigger value="view">View Datasets</TabsTrigger>
-          <TabsTrigger value="add">Add Dataset</TabsTrigger>
-          <TabsTrigger value="remove">Remove Dataset</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="view">
-          <ViewSectionDatasets datasets={datasets} />
-        </TabsContent>
-        
-        <TabsContent value="add">
-          {/* <AddSectionDataset onAddDataset={handleAddDataset} /> */}
-          <AddSectionDataset></AddSectionDataset>
-        </TabsContent>
-        
-        <TabsContent value="remove">
-          <RemoveSectionDataset datasets={datasets} onRemove={handleRemoveDataset} />
-        </TabsContent>
-      </Tabs>
+      {loading && <p>Loading datasets...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {!loading && !error && (
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList>
+            <TabsTrigger value="view">View Datasets</TabsTrigger>
+            <TabsTrigger value="add">Add Dataset</TabsTrigger>
+            {/* <TabsTrigger value="remove">Remove Dataset</TabsTrigger> */}
+            <TabsTrigger value="insights">Insights</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="view">
+            <ViewSectionDatasets datasets={datasets} onRemove={handleRemoveDataset} onAddClick={handleAddClick} />
+          </TabsContent>
+          
+          <TabsContent value="add">
+            <AddSectionDataset onAddDataset={handleAddDataset} />
+          </TabsContent>
+          
+          {/* <TabsContent value="remove">
+            <RemoveSectionDataset datasets={datasets} onRemove={handleRemoveDataset} />
+          </TabsContent> */}
+
+          <TabsContent value="insights">
+            <InsightsPage />
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   )
 }
+function setActiveTab(arg0: string) {
+    throw new Error('Function not implemented.')
+}
+
