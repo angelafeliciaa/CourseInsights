@@ -1,11 +1,12 @@
 'use client'
-// from ai
+
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Search, Trash2, Plus} from 'lucide-react'
+import { Search, Trash2, Plus, BarChart } from 'lucide-react'
+import InsightsPage from './insights-page'
 
 type Dataset = {
   id: string
@@ -14,8 +15,8 @@ type Dataset = {
 }
 
 export default function ViewSectionDatasets({ 
-  datasets = [], 
-  onRemove, 
+  datasets = [],
+  onRemove,
   onAddClick 
 }: { 
   datasets: Dataset[], 
@@ -25,6 +26,7 @@ export default function ViewSectionDatasets({
   const [searchTerm, setSearchTerm] = useState('')
   const [filteredDatasets, setFilteredDatasets] = useState(datasets)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error', message: string } | null>(null)
+  const [currentDatasetId, setCurrentDatasetId] = useState<string | null>(null)
 
   const handleSearch = () => {
     const filtered = datasets.filter(dataset => 
@@ -50,6 +52,19 @@ export default function ViewSectionDatasets({
       setFeedback({ type: 'error', message: 'An error occurred. Please try again.' })
     }
   }
+
+  const viewInsights = (id: string) => {
+    setCurrentDatasetId(id)
+  }
+
+  const handleBack = () => {
+    setCurrentDatasetId(null)
+  }
+
+  if (currentDatasetId) {
+    return <InsightsPage id={currentDatasetId} onBack={handleBack} />
+  }
+
 
   return (
     <div className="space-y-4">
@@ -86,14 +101,23 @@ export default function ViewSectionDatasets({
             <Card key={dataset.id}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-lg font-medium">{dataset.id}</CardTitle>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => handleRemove(dataset.id)}
-                  aria-label={`Remove dataset ${dataset.id}`}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="outline"
+                    size="icon" 
+                    onClick={() => viewInsights(dataset.id)}
+                    aria-label={`View insights for dataset ${dataset.id}`}>
+                    <BarChart className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => handleRemove(dataset.id)}
+                    aria-label={`Remove dataset ${dataset.id}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">Dataset Kind: {dataset.kind}</p>
