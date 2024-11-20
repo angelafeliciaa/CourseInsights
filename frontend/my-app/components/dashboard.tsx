@@ -71,7 +71,7 @@ export default function SectionInsightsDashboard() {
             <TabsTrigger value="view">View Datasets</TabsTrigger>
             <TabsTrigger value="add">Add Dataset</TabsTrigger>
             {/* <TabsTrigger value="remove">Remove Dataset</TabsTrigger> */}
-            <TabsTrigger value="insights">Insights</TabsTrigger>
+            {/* <TabsTrigger value="insights">Insights</TabsTrigger> */}
           </TabsList>
           
           <TabsContent value="view">
@@ -86,9 +86,9 @@ export default function SectionInsightsDashboard() {
             <RemoveSectionDataset datasets={datasets} onRemove={handleRemoveDataset} />
           </TabsContent> */}
 
-          <TabsContent value="insights">
+          {/* <TabsContent value="insights">
             <InsightsPage />
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       )}
     </div>
