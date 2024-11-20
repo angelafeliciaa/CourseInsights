@@ -14,7 +14,7 @@ type Dataset = {
   year: number
 }
 
-export default function InsightsPage() {
+export default function InsightsPage({ id, onBack }: { id: string, onBack: () => void }) {
   const [datasets, setDatasets] = useState<Dataset[]>([])
   const [filteredDatasets, setFilteredDatasets] = useState<Dataset[]>([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -54,8 +54,13 @@ export default function InsightsPage() {
 
   return (
     <div className="space-y-8">
+      {onBack && (
+        <Button onClick={onBack} className="mb-4">
+          Back to Datasets
+        </Button>
+      )}
+
       <h1 className="text-3xl font-bold">Course Insights</h1>
-      
       <div className="space-y-4">
         <div className="flex space-x-2">
           <Input
