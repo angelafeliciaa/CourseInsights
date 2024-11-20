@@ -78,16 +78,9 @@ export default function InsightsPage({ id, onBack }: { id: string, onBack: () =>
       console.log('Response Text:', responseText);
 
       if (response.ok) {
-        let data;
-        try {
-          const data = JSON.parse(responseText);
-          setDatasets(data.result);
-        } catch (e) {
-          console.error('Failed to parse JSON:', e);
-          setError('Invalid response from server.');
-        }
-        // const data = await response.json();
-        // setDatasets(data.result);
+        const data = JSON.parse(responseText);
+        setDatasets(data.result);
+
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'An error occurred while fetching data.');
