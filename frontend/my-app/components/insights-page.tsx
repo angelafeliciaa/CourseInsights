@@ -7,13 +7,15 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 
-type Dataset = {
-  sections_year: number
-  sections_avg: number
-  sections_pass: number
-  sections_fail: number
-  sections_audit: number
-}
+// type Dataset = {
+//   sections_year: number
+//   sections_avg: number
+//   sections_pass: number
+//   sections_fail: number
+//   sections_audit: number
+// }
+
+type Dataset = Record<string, number>;
 
 type ProcessedData = {
   year: number
@@ -33,12 +35,18 @@ export default function InsightsPage({ id, onBack }: { id: string, onBack: () =>
   const [error, setError] = useState<string | null>(null)
 
   const processData = (data: Dataset[]) => {
-    const filteredData = data.filter(item => item.sections_year !== 1900)
+    const yearKey = `${id}_year`;
+    const avgKey = `${id}_avg`;
+    const passKey = `${id}_pass`;
+    const failKey = `${id}_fail`;
+    const auditKey = `${id}_audit`;
+    const filteredData = data.filter(item => item[yearKey] !== 1900)
 
     const groupedData = filteredData.reduce((acc, item) => {
-      if (!acc[item.sections_year]) {
-        acc[item.sections_year] = {
-          year: item.sections_year,
+      const year = item[yearKey];
+      if (!acc[year]) {
+        acc[year] = {
+          year: item[yearKey],
           totalAvg: 0,
           totalPass: 0,
           totalFail: 0,
@@ -46,11 +54,11 @@ export default function InsightsPage({ id, onBack }: { id: string, onBack: () =>
           count: 0
         };
       }
-      acc[item.sections_year].totalAvg += item.sections_avg;
-      acc[item.sections_year].totalPass += item.sections_pass;
-      acc[item.sections_year].totalFail += item.sections_fail;
-      acc[item.sections_year].totalAudit += item.sections_audit;
-      acc[item.sections_year].count += 1;
+      acc[year].totalAvg += item[avgKey];
+      acc[year].totalPass += item[passKey];
+      acc[year].totalFail += item[failKey];
+      acc[year].totalAudit += item[auditKey];
+      acc[year].count += 1;
       return acc;
     }, {} as Record<number, { year: number; totalAvg: number; totalPass: number; totalFail: number; totalAudit: number, count: number }>);
 
@@ -129,6 +137,7 @@ export default function InsightsPage({ id, onBack }: { id: string, onBack: () =>
 
       if (response.ok) {
         const data = await response.json()
+        console.log(data)
         setDatasets(data.result)
         processData(data.result)
       } else {
