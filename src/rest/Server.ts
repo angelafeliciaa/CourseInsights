@@ -185,7 +185,7 @@ export default class Server {
 	};
 
 	private postQuery = async (req: Request, res: Response): Promise<void> => {
-		// const query = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+		this.getDatasets(req, res)
 		const query = req.body;
 
 		try {

@@ -67,10 +67,10 @@ export default function InsightsPage({ id, onBack }: { id: string, onBack: () =>
       const totalStudents = group.totalPass + group.totalFail + group.totalAudit;
       return {
         year: group.year,
-        avg: group.totalAvg / group.count,
+        avg: parseFloat((group.totalAvg / group.count).toFixed(2)),
         totalStudents,
-        passRate: (group.totalPass / totalStudents) * 100,
-        failRate: (group.totalFail / totalStudents) * 100,
+        passRate: parseFloat(((group.totalPass / totalStudents) * 100).toFixed(2)),
+  failRate: parseFloat(((group.totalFail / totalStudents) * 100).toFixed(2)),
         count: group.count
       };
     })
