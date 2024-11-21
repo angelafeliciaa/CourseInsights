@@ -163,7 +163,7 @@ describe("Facade C3", function () {
 	});
 
 	it("POST test for query", async function () {
-		const datasetId = "pair4";
+		const datasetId = "ahahah";
 		const kind = "sections";
 		const zipFilePath = path.join(__dirname, "../resources/archives/pair.zip");
 		const numbers = '110'
@@ -182,50 +182,50 @@ describe("Facade C3", function () {
 		
 
 		const ENDPOINT_URL = `/query`;
-		// const query = {
-		// 	"WHERE": {
-		// 	  "AND": [
-		// 		{
-		// 		  "IS": {
-		// 			[`${datasetId}_id`]: numbers
-		// 		  }
-		// 		},
-		// 		{
-		// 		  "IS": {
-		// 			[`${datasetId}_dept`]: letters.toLowerCase()
-		// 		  }
-		// 		}
-		// 	  ]
-		// 	},
-		// 	"OPTIONS": {
-		// 	  "COLUMNS": [
-		// 		`${datasetId}_dept`,
-		// 		`${datasetId}_avg`
-		// 	  ]
-		// 	}
-		//   };
 		const query = {
 			"WHERE": {
 			  "AND": [
 				{
 				  "IS": {
-					"pair4_id": numbers
+					[`${datasetId}_id`]: numbers
 				  }
 				},
 				{
 				  "IS": {
-					"pair4_dept": letters
+					[`${datasetId}_dept`]: letters.toLowerCase()
 				  }
 				}
 			  ]
 			},
 			"OPTIONS": {
 			  "COLUMNS": [
-				"pair4_dept",
-				"pair4_avg"
+				`${datasetId}_dept`,
+				`${datasetId}_avg`
 			  ]
 			}
 		  };
+		// const query = {
+		// 	"WHERE": {
+		// 	  "AND": [
+		// 		{
+		// 		  "IS": {
+		// 			"pair4_id": numbers
+		// 		  }
+		// 		},
+		// 		{
+		// 		  "IS": {
+		// 			"pair4_dept": letters
+		// 		  }
+		// 		}
+		// 	  ]
+		// 	},
+		// 	"OPTIONS": {
+		// 	  "COLUMNS": [
+		// 		"pair4_dept",
+		// 		"pair4_avg"
+		// 	  ]
+		// 	}
+		//   };
 
 		try {
 			const res = await request(SERVER_URL).post(ENDPOINT_URL).send(query).set("Content-Type", "application/json");

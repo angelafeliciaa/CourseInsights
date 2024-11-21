@@ -93,7 +93,8 @@ export class FilterHelper {
 		const [id, fieldStr] = Object.keys(sComparator)[0].split("_");
 		const value = sComparator[`${id}_${fieldStr}`];
 
-		const validFields = this.getValidStringFields(datasetId);
+		const validFields = this.getValidStringFields(data[0]); 
+
 		this.validateFieldStr(fieldStr, validFields, datasetId);
 
 		this.validatePattern(value);
@@ -102,7 +103,6 @@ export class FilterHelper {
 	}
 
 	private validateSComparatorInput(data: DataType[], sComparator: any): void {
-		// Removed datasetId from parameters
 		if (data.length === 0) {
 			throw new InsightError("Data array is empty. Cannot apply SComparator.");
 		}
@@ -117,27 +117,46 @@ export class FilterHelper {
 		}
 	}
 
-	private getValidStringFields(datasetId: string): readonly string[] {
-		const validSectionFields: readonly string[] = ["dept", "id", "instructor", "title", "uuid"];
-		const validRoomFields: readonly string[] = [
-			"fullname",
-			"shortname",
-			"number",
-			"name",
-			"address",
-			"type",
-			"furniture",
-			"href",
-		];
-
-		if (datasetId.startsWith("sections")) {
-			return validSectionFields;
-		} else if (datasetId.startsWith("rooms")) {
-			return validRoomFields;
-		} else {
-			throw new InsightError("Unknown dataset ID prefix.");
-		}
+	// Type Guards
+	private isSection(data: DataType): data is Section {
+    	return (data as Section).dept !== undefined;
 	}
+
+	private isRoom(data: DataType): data is Room {
+    	return (data as Room).fullname !== undefined;
+	}
+
+	private getValidStringFields(data: DataType): readonly string[] {
+        if (this.isSection(data)) {
+            return ["dept", "id", "instructor", "title", "uuid"];
+        } else if (this.isRoom(data)) {
+            return ["fullname", "shortname", "number", "name", "address", "type", "furniture", "href"];
+        } else {
+            throw new InsightError("Unknown data type.");
+        }
+    }
+
+	// private getValidStringFields(datasetId: string): readonly string[] {
+	// 	const validSectionFields: readonly string[] = ["dept", "id", "instructor", "title", "uuid"];
+	// 	const validRoomFields: readonly string[] = [
+	// 		"fullname",
+	// 		"shortname",
+	// 		"number",
+	// 		"name",
+	// 		"address",
+	// 		"type",
+	// 		"furniture",
+	// 		"href",
+	// 	];
+
+	// 	if (datasetId.startsWith("sections")) {
+	// 		return validSectionFields;
+	// 	} else if (datasetId.startsWith("rooms")) {
+	// 		return validRoomFields;
+	// 	} else {
+	// 		throw new InsightError("Unknown dataset ID prefix.");
+	// 	}
+	// }
 
 	private validateFieldStr(fieldStr: string, validFields: readonly string[], datasetId: string): void {
 		if (!validFields.includes(fieldStr)) {
