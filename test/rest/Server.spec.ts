@@ -166,8 +166,8 @@ describe("Facade C3", function () {
 		const datasetId = "ahahah";
 		const kind = "sections";
 		const zipFilePath = path.join(__dirname, "../resources/archives/pair.zip");
-		const numbers = '110'
-		const letters = 'cpsc'
+		const numbers = "110";
+		const letters = "cpsc";
 
 		// Add the dataset before performing the query
 		try {
@@ -179,31 +179,27 @@ describe("Facade C3", function () {
 				expect.fail("An unknown error occurred while adding dataset");
 			}
 		}
-		
 
 		const ENDPOINT_URL = `/query`;
 		const query = {
-			"WHERE": {
-			  "AND": [
-				{
-				  "IS": {
-					[`${datasetId}_id`]: numbers
-				  }
-				},
-				{
-				  "IS": {
-					[`${datasetId}_dept`]: letters.toLowerCase()
-				  }
-				}
-			  ]
+			WHERE: {
+				AND: [
+					{
+						IS: {
+							[`${datasetId}_id`]: numbers,
+						},
+					},
+					{
+						IS: {
+							[`${datasetId}_dept`]: letters.toLowerCase(),
+						},
+					},
+				],
 			},
-			"OPTIONS": {
-			  "COLUMNS": [
-				`${datasetId}_dept`,
-				`${datasetId}_avg`
-			  ]
-			}
-		  };
+			OPTIONS: {
+				COLUMNS: [`${datasetId}_dept`, `${datasetId}_avg`],
+			},
+		};
 		// const query = {
 		// 	"WHERE": {
 		// 	  "AND": [
